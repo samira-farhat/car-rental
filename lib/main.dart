@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
 import 'screens/auth/forgot_password_screen.dart';
+import 'main_screens/home_screen.dart';
 
 
 void main(){
@@ -32,6 +33,7 @@ class MyApp extends StatelessWidget {
         '/login': (context) => LoginScreen(),
         '/register': (context) => RegisterScreen(),
         '/forgot_password': (context) => ForgotPasswordScreen(),
+        '/home': (context) => HomeScreen(),
       },
     );
 
