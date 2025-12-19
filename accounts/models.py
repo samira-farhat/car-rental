@@ -65,3 +65,25 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+
+
+# stores user uploaded documents such as drivers license
+# each document is linked to a user
+class Documentation(models.Model):
+    """
+    Stores user-uploaded documents such as driver's license or ID.
+    Each document is linked to a user.
+    """
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='documents')
+    document_type = models.CharField(max_length=50, default='Driver License')
+    document_image = models.ImageField(upload_to='documents/')  # uploaded images go to media/documents/
+    status = models.CharField(
+        max_length=20,
+        choices=[('pending', 'pending'), ('verified', 'verified'), ('rejected', 'rejected')],
+        default='pending'
+    )
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.email} - {self.document_type}"
