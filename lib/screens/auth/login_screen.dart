@@ -29,7 +29,7 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    final url = Uri.parse('http://192.168.0.107:8000/api/accounts/login/');
+    final url = Uri.parse('http://192.168.0.110:8000/api/accounts/login/');
 
 
     try {
