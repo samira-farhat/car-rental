@@ -2,8 +2,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../screens/auth/login_screen.dart';
 import '../../screens/auth/register_screen.dart';
-import 'bottom_nav_screen/BottomNavigationScreen.dart';
-import '../../globals.dart'; // <-- import globals
+import '../../globals.dart';
+import 'bottom_nav_screen.dart'; // import globals
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -13,20 +13,20 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       body: Container(
         width: double.infinity,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: kBackgroundGradient, // use global gradient
         ),
         child: SafeArea(
           child: Center(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
+              padding: EdgeInsets.symmetric(horizontal: 32),
               child: ListView(
                 children: [
-                  const SizedBox(height: 40),
+                  SizedBox(height: 40),
 
                   // Company name
-                  const Text(
-                    "Drive With Kahchab",
+                  Text(
+                    "Drive With Khachab",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Color(0xFFFFFFFF),
@@ -36,10 +36,10 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
 
                   // Description
-                  const Text(
+                  Text(
                     "A modern car rental experience focused on reliability, comfort, and total freedom. Wherever you're headed, we drive the journey with you.",
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -49,7 +49,7 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 48),
+                  SizedBox(height: 48),
 
                   // Login button
                   SizedBox(
@@ -61,14 +61,14 @@ class HomeScreen extends StatelessWidget {
                             MaterialPageRoute(builder: (_) => LoginScreen()));
                       },
                       style: kElevatedButtonStyle, // <-- global style
-                      child: const Text(
+                      child: Text(
                         "Login",
                         style: TextStyle(fontSize: 16),
                       ),
                     ),
                   ),
 
-                  const SizedBox(height: 18),
+                  SizedBox(height: 18),
 
                   // Register button
                   SizedBox(
@@ -80,7 +80,7 @@ class HomeScreen extends StatelessWidget {
                             MaterialPageRoute(builder: (_) => RegisterScreen()));
                       },
                       style: kOutlinedButtonStyle, // <-- global style
-                      child: const Text(
+                      child: Text(
                         "Register",
                         style: TextStyle(
                           color: Color(0xFFFFFFFF),
@@ -90,7 +90,7 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 26),
+                  SizedBox(height: 26),
 
                   // Continue as Guest (Glass-style button)
                   GestureDetector(
@@ -99,7 +99,7 @@ class HomeScreen extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (_) =>
-                              BottomNavigationScreen(isGuest: true),
+                              BottomNavScreen(isGuest: true),
                         ),
                       );
                     },
@@ -118,7 +118,7 @@ class HomeScreen extends StatelessWidget {
                               color: Colors.white.withOpacity(0.25),
                             ),
                           ),
-                          child: const Text(
+                          child: Text(
                             "Continue as Guest",
                             style: TextStyle(
                               color: Color(0xFFFFFFFF),
@@ -131,7 +131,7 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 40),
+                  SizedBox(height: 40),
 
                   // Circular logo with ambient glow
                   Stack(
@@ -144,7 +144,7 @@ class HomeScreen extends StatelessWidget {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF49C5E0).withOpacity(0.45),
+                              color: Color(0xFF49C5E0).withOpacity(0.45),
                               blurRadius: 40,
                               spreadRadius: 8,
                             ),
@@ -157,10 +157,10 @@ class HomeScreen extends StatelessWidget {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: const Color(0xFFFFFFFF),
+                            color: Color(0xFFFFFFFF),
                             width: 2,
                           ),
-                          image: const DecorationImage(
+                          image: DecorationImage(
                             image: AssetImage("assets/images/logo.jpg"),
                             fit: BoxFit.cover,
                           ),

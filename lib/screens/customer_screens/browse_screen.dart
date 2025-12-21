@@ -55,7 +55,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
-          "Your Next Drive Starts Here... ✇",
+          "Your Next Drive Starts Here...",
           style: TextStyle(
             fontFamily: "Times New Roman",
             fontSize: 20,

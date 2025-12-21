@@ -131,6 +131,7 @@ class  _RegisterScreenState extends State<RegisterScreen> {
 
                       TextFormField(
                         controller: firstNameController,
+                        style: TextStyle(color: Colors.white),
                         decoration: InputDecoration(
                           label: RichText(
                             text: TextSpan(
@@ -157,6 +158,7 @@ class  _RegisterScreenState extends State<RegisterScreen> {
 
                       TextFormField(
                         controller: middleNameController,
+                        style: TextStyle(color: Colors.white),
                         decoration: InputDecoration(
                           label: RichText(
                             text: TextSpan(
@@ -171,6 +173,7 @@ class  _RegisterScreenState extends State<RegisterScreen> {
 
                       TextFormField(
                         controller: lastNameController,
+                        style: TextStyle(color: Colors.white),
                         decoration: InputDecoration(
                           label: RichText(
                             text: TextSpan(
@@ -197,6 +200,7 @@ class  _RegisterScreenState extends State<RegisterScreen> {
 
                       TextFormField(
                         controller: ageController,
+                        style: TextStyle(color: Colors.white),
                         decoration: InputDecoration(
                           label: RichText(
                             text: TextSpan(
@@ -223,6 +227,7 @@ class  _RegisterScreenState extends State<RegisterScreen> {
 
                       TextFormField(
                         controller: addressController,
+                        style: TextStyle(color: Colors.white),
                         decoration: InputDecoration(
                           label: RichText(
                             text: TextSpan(
@@ -249,6 +254,7 @@ class  _RegisterScreenState extends State<RegisterScreen> {
 
                       TextFormField(
                         controller: phoneController,
+                        style: TextStyle(color: Colors.white),
                         decoration: InputDecoration(
                           label: RichText(
                             text: TextSpan(
@@ -275,6 +281,7 @@ class  _RegisterScreenState extends State<RegisterScreen> {
 
                       TextFormField(
                         controller: emailController,
+                        style: TextStyle(color: Colors.white),
                         decoration: InputDecoration(
                           label: RichText(
                             text: TextSpan(
@@ -301,6 +308,7 @@ class  _RegisterScreenState extends State<RegisterScreen> {
 
                       TextFormField(
                         controller: passwordController,
+                        style: TextStyle(color: Colors.white),
                         obscureText: _obscurePassword,
                         decoration: InputDecoration(
                           label: RichText(
@@ -338,6 +346,7 @@ class  _RegisterScreenState extends State<RegisterScreen> {
 
                       TextFormField(
                         controller: confirmPasswordController,
+                        style: TextStyle(color: Colors.white),
                         obscureText: _obscurePassword,
                         decoration: InputDecoration(
                           label: RichText(
