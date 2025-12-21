@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import '../../main_screens/bottom_nav_screen.dart';
+
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -29,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    final url = Uri.parse('http://192.168.0.107:8000/api/accounts/login/');
+    final url = Uri.parse('http://192.168.0.110:8000/api/accounts/login/');
 
 
     try {
@@ -47,8 +49,13 @@ class _LoginScreenState extends State<LoginScreen> {
             SnackBar(content: Text("Login successful!"))
         );
 
-        // Navigate to home screen
-        Navigator.pushReplacementNamed(context, '/home');
+        // Navigate to browse screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => BottomNavScreen(isGuest: false),
+          ),
+        );
       }else {
         // Error (like invalid credentials)
         ScaffoldMessenger.of(context).showSnackBar(
