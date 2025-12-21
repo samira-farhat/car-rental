@@ -1,0 +1,65 @@
+{
+   "checksum": "cb05acb652b91396d1f47a2a6b82e712",
+   "roots": {
+      "bookmark_bar": {
+         "children": [ {
+            "date_added": "13343488341862894",
+            "date_last_used": "0",
+            "guid": "4e8bdfce-6cb6-4941-b2df-41eef3c6acd0",
+            "id": "6",
+            "meta_info": {
+               "power_bookmark_meta": ""
+            },
+            "name": "Now downloading: Phone Link App 1.23091.116 | TechSpot",
+            "show_icon": false,
+            "source": "sync",
+            "type": "url",
+            "url": "https://www.techspot.com/downloads/downloadnow/3660/?evp=83c290afdab3cebc6feb998f2d58ae90&file=3814",
+            "visit_count": 0
+         }, {
+            "date_added": "13409055155613931",
+            "date_last_used": "0",
+            "guid": "8cbdc4f3-5f4b-4602-847d-e3f73b09157e",
+            "id": "7",
+            "name": "fullDFD.drawio - draw.io",
+            "show_icon": false,
+            "source": "sync",
+            "type": "url",
+            "url": "https://app.diagrams.net/",
+            "visit_count": 1
+         } ],
+         "date_added": "13410775477763166",
+         "date_last_used": "0",
+         "date_modified": "13409055155613931",
+         "guid": "0bc5d13f-2cba-5d74-951f-3f233fe6c908",
+         "id": "1",
+         "name": "Favorites bar",
+         "source": "unknown",
+         "type": "folder"
+      },
+      "other": {
+         "children": [  ],
+         "date_added": "13410775477763166",
+         "date_last_used": "0",
+         "date_modified": "0",
+         "guid": "82b081ec-3dd3-529c-8475-ab6c344590dd",
+         "id": "2",
+         "name": "Other favorites",
+         "source": "unknown",
+         "type": "folder"
+      },
+      "synced": {
+         "children": [  ],
+         "date_added": "13410775477763166",
+         "date_last_used": "0",
+         "date_modified": "0",
+         "guid": "4cf2e351-0e85-532b-bb37-df045d8f8d0f",
+         "id": "3",
+         "name": "Mobile favorites",
+         "source": "unknown",
+         "type": "folder"
+      }
+   },
+   "sync_metadata": "CjEKDgiIgQISCFvLQdmaAQAAEgAqGHJERnY3aHZoYmxxZy85bHpmYjFuYWc9PUgDoAYHEq0BCAcSqAEKHEJielhnUS9WbjU4UXF3blFYNGZoWEhPSTFoOD0SJDhjYmRjNGYzLTVmNGItNDYwMi04NDdkLWUzZjczYjA5MTU3ZRgAIAAoADDalofKrTM44pmHyq0zQOKZh8qtM0ocUGNISzlRNEdwV0tEaVB1L0xwLzlXWHhMekFZPVofIh2sS3Z4dEhQYkV2THNvWHNjanFEQXRYc282QVRNPWV23KW3wj4CYAUSrAEIBhKnAQocZ3ZyalZDT2tvUFN6akFlRzJvUnZXaHNqbnBzPRIkNGU4YmRmY2UtNmNiNi00OTQxLWIyZGYtNDFlZWYzYzZhY2QwGAAgACgAMPbg8NG7MTju5/DRuzFA7ufw0bsxShw1STltZE1wVm9za0UrQ3QyWEp1Q1NsMkNJeUE9Wh4iHFhCbDlNNlordjI4ajUveVVEckhGUDNLYnIxND1lhnaOTsI+AmAFEo4BCAISiQEKHFljU1RvbnZFU1B3cUNzNEwyY3JWaHY2OEw5OD0SJDNlY2JhY2NlLWE5ZTQtNTZlMS1iNWNkLTg4NDE5ZTA0NzliZBgAIAAoADCQ3tP+tzE4wuPT/rcxQMLj0/63MUocb1BWa2h3QlJiVjY1S0NXUjIrSU9OSFdvT3U4PVoAZQAAAADCPgJgABKOAQgBEokBChx5eEovNmZ2a2VjcjdrcDVFUXpCNHRXTHBkYkU9EiRlZDM1NTlkNi0xZWU4LTVjMzUtOWExMC1mMmExZTJkMWIyMGMYACAAKAAwj97T/rcxOKbj0/63MUCm49P+tzFKHGFSQ1dMZ2hGOWI1SW5xS0lEdnVKL2p2UWtGYz1aAGUAAAAAwj4CYAASjgEIAxKJAQocbmpnRHU4OGVDcnZYcDg2cEQ3ZkhHY3FGcDg4PRIkNmQ5MzA0YzktZjk2Zi01ZGY2LWJkMTYtMWVjMGZhMzQ2ODIyGAAgACgAMJXe0/63MTj249P+tzFA9uPT/rcxShx5ek5CMDFjbjU0QTdjUlUwdVQrL1BnbVR0VW89WgBlAAAAAMI+AmAAMAA4AA==",
+   "version": 1
+}
