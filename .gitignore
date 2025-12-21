@@ -18,3 +18,12 @@ media/
 
 # OS
 .DS_Store
+
+# Flutter/Dart
+.dart_tool/
+build/
+.packages
+pubspec.lock
+
+# Others
+*.log
