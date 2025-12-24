@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
 import '../../main_screens/bottom_nav_screen.dart';
 
 
@@ -31,8 +30,10 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    final url = Uri.parse('http://192.168.0.110:8000/api/accounts/login/');
-
+    //final url = Uri.parse('http://192.168.0.110:8000/api/accounts/login/');
+    final url = Uri.parse(
+        'http://localhost:8000/api/accounts/login/'
+    );
 
     try {
       final response = await http.post(
@@ -73,29 +74,27 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          // for the background image
-          Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/login_bg.jpeg'),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
+      resizeToAvoidBottomInset: true,
+      body: Expanded(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(0),
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
 
-          // overlaying the login form
-          Center(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.all(40.0),
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
+                  Image.asset(
+                    'assets/images/top_login.jpeg',
+                    width: double.infinity,
+                    height: 200,
+                    fit: BoxFit.contain,
+                  ),
 
-                    Semantics(
+                  SizedBox(height: 10,),
+
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(40.0, 0, 40.0, 0),
+                    child: Semantics(
                       label: 'Email input field',
                       hint: 'Enter your email address',
                       textField: true,
@@ -110,10 +109,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
+                  ),
 
-                    SizedBox(height: 15),
+                  SizedBox(height: 15),
 
-                    Semantics(
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(40.0, 0, 40.0, 0),
+                    child: Semantics(
                       label: 'Password input field',
                       hint: 'Enter your password',
                       textField: true,
@@ -136,13 +138,16 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
+                  ),
 
-                    SizedBox(height: 10),
+                  SizedBox(height: 10),
 
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Semantics(
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(40.0, 0, 40.0, 0),
+                        child: Semantics(
                           label: 'Forgot password button',
                           hint: 'Tap to reset your password',
                           button: true,
@@ -159,56 +164,72 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
+                  ),
 
-                    SizedBox(height: 40),
+                  SizedBox(height: 40),
 
-                    Semantics(
-                      label: 'Login button',
-                      hint: 'Tap to log into your account',
-                      button: true,
-                      child: ElevatedButton(
-                        onPressed: loginUser, // calling the login function
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: midnightBlue,
-                          padding: EdgeInsets.symmetric(horizontal: 100, vertical: 15),
-                        ),
-                        child: Text(
-                          'LOGIN',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
+                  Semantics(
+                    label: 'Login button',
+                    hint: 'Tap to log into your account',
+                    button: true,
+                    child: ElevatedButton(
+                      onPressed: loginUser, // calling the login function
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: midnightBlue,
+                        padding: EdgeInsets.symmetric(horizontal: 100, vertical: 15),
+                      ),
+                      child: Text(
+                        'LOGIN',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
+                  ),
 
-                    SizedBox(height: 6),
+                  SizedBox(height: 6),
 
-                    Semantics(
-                      label: 'Register button',
-                      hint: 'Tap to create a new account',
-                      button: true,
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/register');
-                        },
-                        child: Text(
-                          'Don\'t have an account? Register',
-                          style: TextStyle(
-                            color: midnightBlue,
-                          ),
+                  Semantics(
+                    label: 'Register button',
+                    hint: 'Tap to create a new account',
+                    button: true,
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/register');
+                      },
+                      child: Text(
+                        'Don\'t have an account? Register',
+                        style: TextStyle(
+                          color: midnightBlue,
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+
+                  SizedBox(height: 30),
+
+                  Image.asset(
+                    'assets/images/bottom_login.jpeg',
+                    fit: BoxFit.fitWidth,
+                  )
+
+                ],
               ),
             ),
-        ],
+          ),
+
+
       ),
+
+      /*bottomNavigationBar: Image.asset(
+      'assets/images/bottom_login.jpeg',
+      fit: BoxFit.fitWidth,
+    )*/
+
     );
   }
 }
