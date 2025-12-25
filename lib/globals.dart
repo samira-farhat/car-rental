@@ -44,4 +44,4 @@ final ButtonStyle kOutlinedButtonStyle = OutlinedButton.styleFrom(
 );
 
 // Global wishlist list (stores car IDs)
-List<int> wishlistedCars = [];
+ValueNotifier<List<int>> wishlistedCarsNotifier = ValueNotifier<List<int>>([]);

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/car_model.dart';
 import '../screens/customer_screens/rent_screen.dart';
 import '../screens/customer_screens/reserve_screen.dart';
-import '../globals.dart'; // importing the global wishlistred cars list
+import '../globals.dart'; // importing the global wishlisted cars list
 
 class CarCard extends StatefulWidget {
   final Car car;
@@ -21,8 +21,6 @@ class CarCard extends StatefulWidget {
 }
 
 class _CarCardState extends State<CarCard> {
-  bool isWishlisted = false; // heart state
-
   @override
   Widget build(BuildContext context) {
     final Color cardBlue = Color(0xFF1E83A1); // lighter midnight blue
@@ -49,7 +47,6 @@ class _CarCardState extends State<CarCard> {
           children: [
             Row(
               children: [
-
                 // Car Image
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
@@ -109,7 +106,6 @@ class _CarCardState extends State<CarCard> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-
                 // Rent Button
                 TextButton(
                   onPressed: () {
@@ -150,29 +146,32 @@ class _CarCardState extends State<CarCard> {
                   child: Text('Reserve'),
                 ),
 
-                // Wishlist Heart Icon
-                IconButton(
-                  onPressed: () {
-                    if (widget.isGuest) {
-                      Navigator.pushNamed(context, '/login'); // go to login for guests
-                    } else {
-                      setState(() {
-                        isWishlisted = !isWishlisted;
+                // Wishlist Heart Icon using ValueListenableBuilder
+                ValueListenableBuilder<List<int>>(
+                  valueListenable: wishlistedCarsNotifier,
+                  builder: (context, wishlisted, child) {
+                    final isWishlisted = wishlisted.contains(widget.car.carId);
 
-                        if (isWishlisted) {
-                          wishlistedCars.add(widget.car.carId);
+                    return IconButton(
+                      onPressed: () {
+                        if (widget.isGuest) {
+                          Navigator.pushNamed(context, '/login');
                         } else {
-                          wishlistedCars.remove(widget.car.carId);
+                          if (isWishlisted) {
+                            wishlistedCarsNotifier.value =
+                            List.from(wishlisted)..remove(widget.car.carId);
+                          } else {
+                            wishlistedCarsNotifier.value =
+                            List.from(wishlisted)..add(widget.car.carId);
+                          }
                         }
-
-                        print('Current wishlist: $wishlistedCars');
-                      });
-                    }
+                      },
+                      icon: Icon(
+                        isWishlisted ? Icons.favorite : Icons.favorite_border,
+                        color: isWishlisted ? Colors.red : Colors.grey,
+                      ),
+                    );
                   },
-                  icon: Icon(
-                    isWishlisted ? Icons.favorite : Icons.favorite_border,
-                    color: isWishlisted ? Colors.red : Colors.grey,
-                  ),
                 ),
               ],
             ),

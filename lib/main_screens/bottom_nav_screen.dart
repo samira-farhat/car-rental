@@ -30,7 +30,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
     _pages = [
       BrowseScreen(isGuest: widget.isGuest), // First tab: Browse cars
       SearchScreen(), // Second tab: Search
-      WishlistScreen(wishlistedCars: wishlistedCars,), // Third tab: Wishlist
+      WishlistScreen(), // Third tab: Wishlist
       ProfileScreen(), // Fourth tab: Profile
     ];
   }
