@@ -4,6 +4,7 @@ class Car {
   final String brand;
   final String model;
   final int year;
+  final String description;
   final String rentalPricePerDay;
   final String availabilityStatus;
   final String imageUrl;
@@ -15,6 +16,7 @@ class Car {
     required this.brand,
     required this.model,
     required this.year,
+    required this.description,
     required this.rentalPricePerDay,
     required this.availabilityStatus,
     required this.imageUrl,
@@ -28,6 +30,7 @@ class Car {
       brand: json['brand'],
       model: json['model'],
       year: json['year'],
+      description: json['description'] ?? '',
       rentalPricePerDay: json['rentalpriceperday'],
       availabilityStatus: json['availabilitystatus'],
       imageUrl: json['image_url'],
