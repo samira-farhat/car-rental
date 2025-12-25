@@ -16,6 +16,7 @@ class Car(models.Model):
     brand = models.CharField(db_column='Brand', max_length=50)
     model = models.CharField(db_column='Model', max_length=50)
     year = models.IntegerField(db_column='Year')
+    description = models.TextField(blank=True, null=True) 
     rentalpriceperday = models.DecimalField(db_column='RentalPricePerDay', max_digits=10, decimal_places=2)
     availabilitystatus = models.CharField(db_column='AvailabilityStatus', max_length=11, blank=True, null=True)
     image = models.CharField(db_column='Image', max_length=255, blank=True, null=True)

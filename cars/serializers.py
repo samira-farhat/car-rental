@@ -19,6 +19,7 @@ class CarSerializer(serializers.ModelSerializer):
             'brand',
             'model',
             'year',
+            'description',
             'rentalpriceperday',
             'availabilitystatus',
             'image_url',
