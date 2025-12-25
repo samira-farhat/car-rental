@@ -1,23 +1,22 @@
 import 'package:flutter/material.dart';
 
+
 class WishlistScreen extends StatelessWidget {
+  final List<int> wishlistedCars; // list of car IDs
+  const WishlistScreen({required this.wishlistedCars, Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Wishlist'),
-        automaticallyImplyLeading: true,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Welcome to the Wishlist Screen!',
-              style: TextStyle(fontSize: 20),
-            ),
-          ],
-        ),
+      appBar: AppBar(title: Text('Wishlist')),
+      body: ListView.builder(
+        itemCount: wishlistedCars.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            leading: Icon(Icons.directions_car),
+            title: Text('Car wishlisted: ${wishlistedCars[index]}'),
+          );
+        },
       ),
     );
   }

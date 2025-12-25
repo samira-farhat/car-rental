@@ -1,8 +1,7 @@
+library car_rental_globals;
 import 'package:flutter/material.dart';
 
-// ----------------------
 // Background Gradient
-// ----------------------
 Color steelBlue = Color(0xFF218BA2);
 Color jetBlack =  Color(0xFF000000);
 Color electricCyan = Color(0xFF49C5E0);
@@ -19,9 +18,8 @@ const LinearGradient kBackgroundGradient = LinearGradient(
   ],
 );
 
-// ----------------------
+
 // Button Styles
-// ----------------------
 
 // Common shape for primary/secondary buttons
 final RoundedRectangleBorder kButtonShape = RoundedRectangleBorder(
@@ -44,3 +42,6 @@ final ButtonStyle kOutlinedButtonStyle = OutlinedButton.styleFrom(
   ),
   shape: kButtonShape,
 );
+
+// Global wishlist list (stores car IDs)
+List<int> wishlistedCars = [];

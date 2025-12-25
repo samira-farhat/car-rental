@@ -2,8 +2,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../screens/auth/login_screen.dart';
 import '../../screens/auth/register_screen.dart';
-import '../../globals.dart';
-import 'bottom_nav_screen.dart'; // import globals
+import '../../globals.dart'; // import globals
+import 'bottom_nav_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
