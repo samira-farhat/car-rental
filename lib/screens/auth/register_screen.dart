@@ -7,10 +7,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert'; // for jsonDecode
 
-
-
 Future<Map<String, dynamic>> registerUser({
-
   required String firstName,
   String? middleName,
   required String lastName,
@@ -23,84 +20,92 @@ Future<Map<String, dynamic>> registerUser({
   required Uint8List? documentBytes,
   String? documentExtension,
 }) async {
-  final uri= Uri.parse('http://192.168.0.110:8000/api/accounts/register/');
+  //final uri= Uri.parse('http://192.168.0.110:8000/api/accounts/register/');
+  final uri = Uri.parse(
+    'http://localhost:8000/api/accounts/register/',
+  );
 
-  var request= http.MultipartRequest('POST', uri);
+  var request = http.MultipartRequest('POST', uri);
 
-  request.fields['first_name']= firstName;
-  if(middleName != null) {
-    request.fields['middle_name']= middleName;
+  request.fields['first_name'] = firstName;
+  if (middleName != null) {
+    request.fields['middle_name'] = middleName;
   }
-  request.fields['last_name']= lastName;
-  request.fields['age']= age;
-  request.fields['address']= address;
-  request.fields['phone']= phone;
-  request.fields['email']= email;
-  request.fields['password']= password;
+  request.fields['last_name'] = lastName;
+  request.fields['age'] = age;
+  request.fields['address'] = address;
+  request.fields['phone'] = phone;
+  request.fields['email'] = email;
+  request.fields['password'] = password;
 
-  if(kIsWeb) {
+  if (kIsWeb) {
     if (documentBytes != null) {
-      String ext= documentExtension ?? 'png'; // fallback to png
-      request.files.add(http.MultipartFile.fromBytes(
-        'document_image',
-        documentBytes,
-        filename: 'license_${DateTime.now().millisecondsSinceEpoch}.$ext', // dynamic filename
-      ));
+      String ext = documentExtension ?? 'png'; // fallback to png
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'document_image',
+          documentBytes,
+          filename:
+          'license_${DateTime.now().millisecondsSinceEpoch}.$ext', // dynamic filename
+        ),
+      );
     }
-  }else{
-    if(documentFile != null) {
-      request.files.add(await http.MultipartFile.fromPath(
-        'document_image',
-        documentFile.path,
-        filename: documentFile.path.split('/').last, // dynamic filename
-      ));
+  } else {
+    if (documentFile != null) {
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'document_image',
+          documentFile.path,
+          filename:
+          documentFile.path.split('/').last, // dynamic filename
+        ),
+      );
     }
   }
 
-  try{
-    var streamedResponse= await request.send();
-    var response= await http.Response.fromStream(streamedResponse);
+  try {
+    var streamedResponse = await request.send();
+    var response = await http.Response.fromStream(streamedResponse);
 
-    if(response.statusCode == 201){
+    if (response.statusCode == 201) {
       return {"success": true, "message": "User registered successfully"};
-    }else{
-      var data= jsonDecode(response.body);
+    } else {
+      var data = jsonDecode(response.body);
       return {"success": false, "message": data.toString()};
     }
-  }catch(e){
-      return {"success": false, "message": e.toString()};
+  } catch (e) {
+    return {"success": false, "message": e.toString()};
   }
-
 }
-
-
 
 class RegisterScreen extends StatefulWidget {
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class  _RegisterScreenState extends State<RegisterScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
   final Color midnightBlue = Color(0xFF004760);
   final Color steelBlue = Color(0xFF218BA2);
 
-  bool _obscurePassword= true;
+  int currentStep = 0;
 
-  final TextEditingController firstNameController= TextEditingController();
-  final TextEditingController middleNameController= TextEditingController();
-  final TextEditingController lastNameController= TextEditingController();
-  final TextEditingController ageController= TextEditingController();
-  final TextEditingController addressController= TextEditingController();
-  final TextEditingController phoneController= TextEditingController();
-  final TextEditingController emailController= TextEditingController();
-  final TextEditingController passwordController= TextEditingController();
-  final TextEditingController confirmPasswordController= TextEditingController();
+  bool _obscurePassword = true;
+
+  final TextEditingController firstNameController = TextEditingController();
+  final TextEditingController middleNameController = TextEditingController();
+  final TextEditingController lastNameController = TextEditingController();
+  final TextEditingController ageController = TextEditingController();
+  final TextEditingController addressController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+  TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   File? documentFile; // used fo mobile
   Uint8List? documentBytes; // used for web
   String? documentExtension; // for web file extension
-
 
   @override
   Widget build(BuildContext context) {
@@ -112,9 +117,9 @@ class  _RegisterScreenState extends State<RegisterScreen> {
             children: [
 
               Image.asset(
-                  'assets/images/registration.jpeg',
-                  height: 200,
-                  fit: BoxFit.contain,
+                'assets/images/registration.jpeg',
+                height: 200,
+                fit: BoxFit.contain,
               ),
 
               Container(
@@ -128,353 +133,110 @@ class  _RegisterScreenState extends State<RegisterScreen> {
                   key: _formKey,
                   child: Column(
                     children: [
+                      if (currentStep == 0) stepOne(),
+                      if (currentStep == 1) stepTwo(),
+                      if (currentStep == 2) stepThree(),
 
-                      TextFormField(
-                        controller: firstNameController,
-                        style: TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          label: RichText(
-                            text: TextSpan(
-                              text: 'First Name',
-                              style: TextStyle(color: Colors.white),
-                              children: [
-                                TextSpan(
-                                  text: ' *',
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                              ],
+                      SizedBox(height: 30),
+
+                      Row(
+                        mainAxisAlignment: currentStep == 0
+                            ? MainAxisAlignment.end
+                            : MainAxisAlignment.spaceBetween,
+                        children: [
+
+                          // BACK button
+                          if (currentStep > 0)
+                            TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  currentStep--;
+                                });
+                              },
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.white,
+                              ),
+                              child: Text(
+                                'Back',
+                                style: TextStyle(fontSize: 16),
+                              ),
                             ),
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value== null || value.isEmpty){
-                            return 'First name is required';
-                          }
-                          return null;
-                        },
-                      ),
 
-                      SizedBox(height: 10,),
-
-                      TextFormField(
-                        controller: middleNameController,
-                        style: TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          label: RichText(
-                            text: TextSpan(
-                              text: 'Middle Name',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      SizedBox(height: 10,),
-
-                      TextFormField(
-                        controller: lastNameController,
-                        style: TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          label: RichText(
-                            text: TextSpan(
-                              text: 'Last Name',
-                              style: TextStyle(color: Colors.white),
-                              children: [
-                                TextSpan(
-                                  text: ' *',
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value== null || value.isEmpty){
-                            return 'Last name is required';
-                          }
-                          return null;
-                        },
-                      ),
-
-                      SizedBox(height: 10,),
-
-                      TextFormField(
-                        controller: ageController,
-                        style: TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          label: RichText(
-                            text: TextSpan(
-                              text: 'Age',
-                              style: TextStyle(color: Colors.white),
-                              children: [
-                                TextSpan(
-                                  text: ' *',
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value== null || value.isEmpty){
-                            return 'Age is required';
-                          }
-                          return null;
-                        },
-                      ),
-
-                      SizedBox(height: 10,),
-
-                      TextFormField(
-                        controller: addressController,
-                        style: TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          label: RichText(
-                            text: TextSpan(
-                              text: 'Address',
-                              style: TextStyle(color: Colors.white),
-                              children: [
-                                TextSpan(
-                                  text: ' *',
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value== null || value.isEmpty){
-                            return 'Address is required';
-                          }
-                          return null;
-                        },
-                      ),
-
-                      SizedBox(height: 10,),
-
-                      TextFormField(
-                        controller: phoneController,
-                        style: TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          label: RichText(
-                            text: TextSpan(
-                              text: 'Phone Number',
-                              style: TextStyle(color: Colors.white),
-                              children: [
-                                TextSpan(
-                                  text: ' *',
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value== null || value.isEmpty){
-                            return 'Phone number is required';
-                          }
-                          return null;
-                        },
-                      ),
-
-                      SizedBox(height: 10,),
-
-                      TextFormField(
-                        controller: emailController,
-                        style: TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          label: RichText(
-                            text: TextSpan(
-                              text: 'Email',
-                              style: TextStyle(color: Colors.white),
-                              children: [
-                                TextSpan(
-                                  text: ' *',
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value== null || value.isEmpty){
-                            return 'Email is required';
-                          }
-                          return null;
-                        },
-                      ),
-
-                      SizedBox(height: 10,),
-
-                      TextFormField(
-                        controller: passwordController,
-                        style: TextStyle(color: Colors.white),
-                        obscureText: _obscurePassword,
-                        decoration: InputDecoration(
-                          label: RichText(
-                            text: TextSpan(
-                              text: 'Password',
-                              style: TextStyle(color: Colors.white),
-                              children: [
-                                TextSpan(
-                                  text: ' *',
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                              ],
-                            ),
-                          ),
-                          suffixIcon: IconButton(
-                            onPressed: () {
-                              setState(() {
-                                _obscurePassword = !_obscurePassword;
-                              });
-                            },
-                            icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
-                            color: Colors.white,
-                            iconSize: 20,
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value== null || value.isEmpty){
-                            return 'Password is required';
-                          }
-                          return null;
-                        },
-                      ),
-
-                      SizedBox(height: 10,),
-
-                      TextFormField(
-                        controller: confirmPasswordController,
-                        style: TextStyle(color: Colors.white),
-                        obscureText: _obscurePassword,
-                        decoration: InputDecoration(
-                          label: RichText(
-                            text: TextSpan(
-                              text: 'Confirm Password',
-                              style: TextStyle(color: Colors.white),
-                              children: [
-                                TextSpan(
-                                  text: ' *',
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                              ],
-                            ),
-                          ),
-                          suffixIcon: IconButton(
-                            onPressed: () {
-                              setState(() {
-                                _obscurePassword = !_obscurePassword;
-                              });
-                            },
-                            icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
-                            color: Colors.white,
-                            iconSize: 20,
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value== null || value.isEmpty){
-                            return 'Confirm password is required';
-                          }
-                          return null;
-                        },
-                      ),
-
-                      SizedBox(height: 15,),
-
-                      GestureDetector(
-                          onTap: () async {
-                            // on mobile:
-                            if(!kIsWeb){
-                              PermissionStatus status= await Permission.storage.request();
-                              if(!status.isGranted){
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Storage permission is required to upload the license')),
-                                );
-                                return;
-                              }
-                            }
-
-                            // pick file
-                            FilePickerResult? result= await FilePicker.platform.pickFiles(
-                              type: FileType.custom,
-                              allowedExtensions: ['pdf', 'jpg', 'png', 'jpeg'],
-                              withData: kIsWeb, // to import from web
-                            );
-
-                            if(result != null){
-                              setState(() {
-                                if(kIsWeb){
-                                  documentBytes= result.files.single.bytes; // for web
-                                  documentExtension = result.files.single.extension; // save extension
+                          // NEXT button (steps 0 & 1)
+                          if (currentStep < 2)
+                            TextButton(
+                              onPressed: () {
+                                if (_formKey.currentState!.validate()) {
+                                  setState(() {
+                                    currentStep++;
+                                  });
                                 }
-                                else{
-                                  documentFile= File(result.files.single.path!); // for mobile
+                              },
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.white,
+                              ),
+                              child: Text(
+                                'Next',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ),
+
+                          // REGISTER (final step only)
+                          if (currentStep == 2)
+                            ElevatedButton(
+                              onPressed: () async {
+                                if (!_formKey.currentState!.validate()) return;
+
+                                if (documentFile == null && documentBytes == null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Please upload your license')),
+                                  );
+                                  return;
                                 }
-                              });
-                            }
-                          },
-                          child: Text(
-                            (documentFile != null || documentBytes != null) ? 'License Selected' : 'Upload License *',
-                            style: TextStyle(color: Colors.redAccent,
-                              decoration: TextDecoration.underline,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
-                            ),
-                          ),
-                      ),
 
-                      SizedBox(height: 40,),
-
-                      ElevatedButton(
-                          onPressed: () async {
-                            if(_formKey.currentState!.validate()){
-                              if (documentFile == null && documentBytes == null){
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Please upload your license')),
+                                var result = await registerUser(
+                                  firstName: firstNameController.text,
+                                  middleName: middleNameController.text.isEmpty
+                                      ? null
+                                      : middleNameController.text,
+                                  lastName: lastNameController.text,
+                                  age: ageController.text,
+                                  address: addressController.text,
+                                  phone: phoneController.text,
+                                  email: emailController.text,
+                                  password: passwordController.text,
+                                  documentFile: documentFile,
+                                  documentBytes: documentBytes,
+                                  documentExtension: documentExtension,
                                 );
-                                return;
-                              }
 
-                              var result = await registerUser(
-                                firstName: firstNameController.text,
-                                middleName: middleNameController.text.isEmpty ? null : middleNameController.text,
-                                lastName: lastNameController.text,
-                                age: ageController.text,
-                                address: addressController.text,
-                                phone: phoneController.text,
-                                email: emailController.text,
-                                password: passwordController.text,
-                                documentFile: documentFile,
-                                documentBytes: documentBytes,
-                                documentExtension: documentExtension,
-                              );
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(result['message'])),
+                                );
 
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(result['message'])),
-                              );
-
-                              if (result['success']) {
-                                Navigator.pushNamed(context, '/login');
-                              }
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: steelBlue,
-                            padding: EdgeInsets.symmetric(horizontal: 100, vertical: 15),
-
-                          ),
-                          child: Text(
-                            'REGISTER',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
+                                if (result['success']) {
+                                  Navigator.pushNamed(context, '/login');
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: steelBlue,
+                                padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                              ),
+                              child: Text(
+                                'REGISTER',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
-                          ),
+                        ],
                       ),
 
-                      SizedBox(height: 6,),
+                      SizedBox(height: 6),
 
                       TextButton(
                         onPressed: () {
@@ -482,13 +244,9 @@ class  _RegisterScreenState extends State<RegisterScreen> {
                         },
                         child: Text(
                           'Already have an account? Login',
-                          style: TextStyle(
-                            color: Colors.white,
-                          ),
+                          style: TextStyle(color: Colors.white),
                         ),
                       ),
-
-
                     ],
                   ),
                 ),
@@ -497,6 +255,224 @@ class  _RegisterScreenState extends State<RegisterScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  // STEPS
+
+  Widget stepOne() {
+    return Column(
+      children: [
+        firstNameField(),
+        SizedBox(height: 10),
+        middleNameField(),
+        SizedBox(height: 10),
+        lastNameField(),
+        SizedBox(height: 10),
+        ageField(),
+      ],
+    );
+  }
+
+  Widget stepTwo() {
+    return Column(
+      children: [
+        addressField(),
+        SizedBox(height: 10),
+        phoneField(),
+        SizedBox(height: 10),
+        emailField(),
+      ],
+    );
+  }
+
+  Widget stepThree() {
+    return Column(
+      children: [
+        passwordField(),
+        SizedBox(height: 10),
+        confirmPasswordField(),
+        SizedBox(height: 15),
+        uploadLicenseButton(),
+      ],
+    );
+  }
+
+  // FIELDS
+
+  Widget firstNameField() => buildRequiredField(
+      firstNameController, 'First Name', 'First name is required');
+
+  Widget middleNameField() => TextFormField(
+    controller: middleNameController,
+    style: TextStyle(color: Colors.white),
+    decoration:
+    InputDecoration(labelText: 'Middle Name', labelStyle: TextStyle(color: Colors.white)),
+  );
+
+  Widget lastNameField() => buildRequiredField(
+      lastNameController, 'Last Name', 'Last name is required');
+
+  Widget ageField() =>
+      buildRequiredField(ageController, 'Age', 'Age is required');
+
+  Widget addressField() =>
+      buildRequiredField(addressController, 'Address', 'Address is required');
+
+  Widget phoneField() => buildRequiredField(
+      phoneController, 'Phone Number', 'Phone number is required');
+
+  Widget emailField() =>
+      buildRequiredField(emailController, 'Email', 'Email is required');
+
+  Widget passwordField() => buildPasswordField(
+      passwordController, 'Password', 'Password is required');
+
+  Widget confirmPasswordField() {
+    return TextFormField(
+      controller: confirmPasswordController,
+      style: TextStyle(color: Colors.white),
+      obscureText: _obscurePassword,
+      decoration: InputDecoration(
+        label: RichText(
+          text: TextSpan(
+            text: 'Confirm Password',
+            style: TextStyle(color: Colors.white),
+            children: [
+              TextSpan(text: ' *', style: TextStyle(color: Colors.red)),
+            ],
+          ),
+        ),
+        suffixIcon: IconButton(
+          onPressed: () {
+            setState(() {
+              _obscurePassword = !_obscurePassword;
+            });
+          },
+          icon: Icon(
+            _obscurePassword ? Icons.visibility_off : Icons.visibility,
+          ),
+          color: Colors.white,
+          iconSize: 20,
+        ),
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Confirm password is required';
+        }
+        if (value != passwordController.text) {
+          return 'Passwords do not match';
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget uploadLicenseButton() {
+    return GestureDetector(
+      onTap: () async {
+        // on mobile:
+        if (!kIsWeb) {
+          PermissionStatus status = await Permission.storage.request();
+          if (!status.isGranted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content: Text(
+                      'Storage permission is required to upload the license')),
+            );
+            return;
+          }
+        }
+
+        // pick file
+        FilePickerResult? result = await FilePicker.platform.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: ['pdf', 'jpg', 'png', 'jpeg'],
+          withData: kIsWeb, // to import from web
+        );
+
+        if (result != null) {
+          setState(() {
+            if (kIsWeb) {
+              documentBytes = result.files.single.bytes; // for web
+              documentExtension =
+                  result.files.single.extension; // save extension
+            } else {
+              documentFile =
+                  File(result.files.single.path!); // for mobile
+            }
+          });
+        }
+      },
+      child: Text(
+        (documentFile != null || documentBytes != null)
+            ? 'License Selected'
+            : 'Upload License *',
+        style: TextStyle(
+          color: Colors.redAccent,
+          decoration: TextDecoration.underline,
+          fontWeight: FontWeight.bold,
+          fontSize: 15,
+        ),
+      ),
+    );
+  }
+
+  Widget buildRequiredField(
+      TextEditingController controller, String label, String error) {
+    return TextFormField(
+      controller: controller,
+      style: TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        label: RichText(
+          text: TextSpan(
+            text: label,
+            style: TextStyle(color: Colors.white),
+            children: [
+              TextSpan(text: ' *', style: TextStyle(color: Colors.red)),
+            ],
+          ),
+        ),
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) return error;
+        return null;
+      },
+    );
+  }
+
+  Widget buildPasswordField(
+      TextEditingController controller, String label, String error) {
+    return TextFormField(
+      controller: controller,
+      style: TextStyle(color: Colors.white),
+      obscureText: _obscurePassword,
+      decoration: InputDecoration(
+        label: RichText(
+          text: TextSpan(
+            text: label,
+            style: TextStyle(color: Colors.white),
+            children: [
+              TextSpan(text: ' *', style: TextStyle(color: Colors.red)),
+            ],
+          ),
+        ),
+        suffixIcon: IconButton(
+          onPressed: () {
+            setState(() {
+              _obscurePassword = !_obscurePassword;
+            });
+          },
+          icon: Icon(
+              _obscurePassword ? Icons.visibility_off : Icons.visibility),
+          color: Colors.white,
+          iconSize: 20,
+        ),
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) return error;
+        return null;
+      },
     );
   }
 }
