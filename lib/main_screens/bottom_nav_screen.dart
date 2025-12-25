@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../screens/customer_screens/browse_screen.dart';
 import 'home_screen.dart';
 import '../screens/auth/login_screen.dart';
+import '../globals.dart';
 
 class BottomNavScreen extends StatefulWidget {
   final bool isGuest; // true if browsing as guest
@@ -29,7 +30,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
     _pages = [
       BrowseScreen(isGuest: widget.isGuest), // First tab: Browse cars
       SearchScreen(), // Second tab: Search
-      WishlistScreen(), // Third tab: Wishlist
+      WishlistScreen(wishlistedCars: wishlistedCars,), // Third tab: Wishlist
       ProfileScreen(), // Fourth tab: Profile
     ];
   }

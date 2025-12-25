@@ -23,7 +23,7 @@ class CarDetailsScreen extends StatelessWidget {
             Text("Model: ${car.model}"),
             Text("Year: ${car.year}"),
             Text("Price per day: \$${car.rentalPricePerDay}"),
-            Text("Description: \$${car.description}"),
+            Text("Description: ${car.description}"),
           ],
         ),
       ),
