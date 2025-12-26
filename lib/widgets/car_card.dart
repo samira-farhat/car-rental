@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import '../models/car_model.dart';
 import '../screens/customer_screens/rent_screen.dart';
 import '../screens/customer_screens/reserve_screen.dart';
 import '../globals.dart'; // importing the global wishlisted cars list
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class CarCard extends StatefulWidget {
   final Car car;
@@ -153,16 +157,45 @@ class _CarCardState extends State<CarCard> {
                     final isWishlisted = wishlisted.contains(widget.car.carId);
 
                     return IconButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (widget.isGuest) {
                           Navigator.pushNamed(context, '/login');
                         } else {
+                          SharedPreferences prefs = await SharedPreferences.getInstance();
+                          String? token = prefs.getString('access_token');
+
                           if (isWishlisted) {
+                            // to remove from our local notifier
                             wishlistedCarsNotifier.value =
                             List.from(wishlisted)..remove(widget.car.carId);
+
+                            // to remove from backend
+                            final url = Uri.parse(
+                                'http://localhost:8000/api/wishlist/${widget.car.carId}/');
+                            await http.delete(
+                              url,
+                              headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': 'Bearer $token',
+                              },
+                            );
+
                           } else {
+                            // add to local notifier
                             wishlistedCarsNotifier.value =
                             List.from(wishlisted)..add(widget.car.carId);
+
+                            // add to backend
+                            final url = Uri.parse('http://localhost:8000/api/wishlist/');
+                            await http.post(
+                              url,
+                              headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': 'Bearer $token',
+                              },
+                              body: jsonEncode({'car_id': widget.car.carId}),
+                            );
+
                           }
                         }
                       },

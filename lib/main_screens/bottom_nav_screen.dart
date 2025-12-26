@@ -3,9 +3,6 @@ import 'package:car_management_frontend/screens/customer_screens/search_screen.d
 import 'package:car_management_frontend/screens/customer_screens/wishlist_screen.dart';
 import 'package:flutter/material.dart';
 import '../screens/customer_screens/browse_screen.dart';
-import 'home_screen.dart';
-import '../screens/auth/login_screen.dart';
-import '../globals.dart';
 
 class BottomNavScreen extends StatefulWidget {
   final bool isGuest; // true if browsing as guest
@@ -28,10 +25,10 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
     super.initState();
 
     _pages = [
-      BrowseScreen(isGuest: widget.isGuest), // First tab: Browse cars
-      SearchScreen(), // Second tab: Search
-      WishlistScreen(), // Third tab: Wishlist
-      ProfileScreen(), // Fourth tab: Profile
+      Builder(builder: (_) => BrowseScreen(isGuest: widget.isGuest)), // first tab: browse cars
+      Builder(builder: (_) => SearchScreen()), // second tab: search
+      Builder(builder: (_) => WishlistScreen()), // third tab: wishlist
+      Builder(builder: (_) => ProfileScreen()), // fourth tab: profile
     ];
   }
 
