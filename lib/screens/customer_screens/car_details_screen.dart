@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/car_model.dart';
 import '../../globals.dart';
+import '../features/wishlist/widgets/wishlist_button.dart';
 import 'rent_screen.dart';
 import 'reserve_screen.dart';
 
@@ -160,34 +161,8 @@ class _CarDetailsScreenState extends State<CarDetailsScreen> {
                       SizedBox(width: 16),
 
                       // wishlist heart icon
-                      ValueListenableBuilder<List<int>>(
-                        valueListenable: wishlistedCarsNotifier,
-                        builder: (context, wishlisted, child) {
-                          final isWishlisted =
-                          wishlisted.contains(widget.car.carId);
+                      WishlistButton(carId: widget.car.carId, initiallyWishlisted: false)
 
-                          return IconButton(
-                            onPressed: () {
-                              if (isWishlisted) {
-                                wishlistedCarsNotifier.value =
-                                List.from(wishlisted)
-                                  ..remove(widget.car.carId);
-                              } else {
-                                wishlistedCarsNotifier.value =
-                                List.from(wishlisted)
-                                  ..add(widget.car.carId);
-                              }
-                            },
-                            icon: Icon(
-                              isWishlisted
-                                  ? Icons.favorite
-                                  : Icons.favorite_border,
-                              color: isWishlisted ? Colors.red : midnightBlue,
-                            ),
-                            iconSize: 30,
-                          );
-                        },
-                      ),
                     ],
                   ),
                 ],

@@ -20,9 +20,11 @@ Future<Map<String, dynamic>> registerUser({
   required Uint8List? documentBytes,
   String? documentExtension,
 }) async {
+  //Samira
   //final uri= Uri.parse('http://192.168.0.110:8000/api/accounts/register/');
   final uri = Uri.parse(
-    'http://localhost:8000/api/accounts/register/',
+    //Mohammad
+    'http://192.168.10.20/api/accounts/register/',
   );
 
   var request = http.MultipartRequest('POST', uri);
