@@ -38,9 +38,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'accounts',
     'corsheaders',
+
+    'accounts',
     'cars',
+    'wishlist',
 ]
 
 MIDDLEWARE = [
@@ -146,3 +148,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/' # used to access uploaded files
 MEDIA_ROOT = BASE_DIR / 'media' # folder where uploaded images are physically stored
+
+
+# Django REST Framework settings
+REST_FRAMEWORK = {
+    # set JWT authentication as default
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    # by default, all views require authentication
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}
