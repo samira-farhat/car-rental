@@ -8,12 +8,16 @@ from django.contrib.auth import authenticate
 from .serializers import UserSerializer, LoginSerializer, PasswordResetSerializer
 from .models import User
 
+# Simple JWT imports
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import AllowAny
+from rest_framework.views import APIView
+
+
 # user registration API
-# handles new user registrations, expects JSON: first_name, last_name, email.. 
 @api_view(['POST'])
 @parser_classes([MultiPartParser, FormParser])  # allows uploading files
 def register_user(request):
-    
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
@@ -21,29 +25,32 @@ def register_user(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+# JWT login API
+class LoginUserView(APIView):
+    permission_classes = [AllowAny]  # public endpoint
 
-# user login API
-# authenticates user and returns success or failure
-@api_view(['POST'])
-def login_user(request):
-   
-    serializer = LoginSerializer(data=request.data)
-    if serializer.is_valid():
-        email = serializer.validated_data['email']
-        password = serializer.validated_data['password']
-        user = authenticate(request, username=email, password=password)
-        if user:
-            return Response({"message": "Login successful", "role": user.role}, status=status.HTTP_200_OK)
-        return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def post(self, request):
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            password = serializer.validated_data['password']
+            user = authenticate(request, username=email, password=password)
+            if user:
+                # generate JWT tokens
+                refresh = RefreshToken.for_user(user)
+                return Response({
+                    "refresh": str(refresh),
+                    "access": str(refresh.access_token),
+                    "role": user.role,
+                    "message": "Login successful"
+                }, status=status.HTTP_200_OK)
+            return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
-# forgot password API (simple)
-# sends a password reset email (still didnt put any real email tho)
+# forgot password API
 @api_view(['POST'])
 def forgot_password(request):
-    
     serializer = PasswordResetSerializer(data=request.data)
     if serializer.is_valid():
         email = serializer.validated_data['email']
