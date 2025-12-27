@@ -1,6 +1,6 @@
 # contains the API logic for user authentication: registration, login, and password reset
 
-from rest_framework.decorators import api_view, parser_classes
+from rest_framework.decorators import api_view, parser_classes, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -17,6 +17,7 @@ from rest_framework.views import APIView
 # user registration API
 @api_view(['POST'])
 @parser_classes([MultiPartParser, FormParser])  # allows uploading files
+@permission_classes([AllowAny])
 def register_user(request):
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
