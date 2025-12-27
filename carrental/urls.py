@@ -32,6 +32,9 @@ urlpatterns = [
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     # refresh token
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/rentals/', include('rentals.urls')),
+    path('api/reviews/', include('reviews.urls')),
+
 ]
 
 # allows Django to serve uploaded images during development
