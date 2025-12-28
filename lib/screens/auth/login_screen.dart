@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart'; // to save tokens locally
-import '../../globals.dart';
 import '../../main_screens/bottom_nav_screen.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -14,11 +14,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-
+  final storage = const FlutterSecureStorage();
   // color to use
   final Color midnightBlue = Color(0xFF004760);
 
-  bool _obscurePassword = true;
+  bool _obscurePassword= true;
 
   Future<void> loginUser() async {
     final String email = emailController.text.trim();
@@ -30,8 +30,12 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       return;
     }
-
-    final url = Uri.parse( 'http://localhost:8000/api/accounts/login/' );
+    //Samira
+    final url = Uri.parse('http://192.168.0.110:8000/api/accounts/login/');
+    // final url = Uri.parse(
+    //   //Mohammad
+    //     'http://192.168.10.20:8000/api/accounts/login/'
+    // );
 
     try {
       final response = await http.post(
@@ -43,29 +47,27 @@ class _LoginScreenState extends State<LoginScreen> {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        // Successful login
+        final data = jsonDecode(response.body);
+        final token = data['access']; // or whatever your login API returns
+
+        // Save token securely
+        await storage.write(key: 'access', value: token);
+
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("Login successful!"))
         );
 
-        // Save tokens locally for authenticated requests
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('access_token', data['access']);
-        await prefs.setString('refresh_token', data['refresh']);
-
-        authToken = data['access'];
-
-        // Navigate to main app screen
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (_) => BottomNavScreen(isGuest: false),
           ),
         );
-      } else {
+      }
+      else {
         // Error (like invalid credentials)
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(data['detail'] ?? data['error'] ?? 'Login failed'))
+            SnackBar(content: Text(data['error'] ?? 'Login failed'))
         );
       }
     } catch (e) {
@@ -74,6 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -84,148 +87,156 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Padding(
             padding: EdgeInsets.all(0),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
 
-                Image.asset(
-                  'assets/images/top_login.jpeg',
-                  width: double.infinity,
-                  height: 200,
-                  fit: BoxFit.contain,
-                ),
-
-                SizedBox(height: 10,),
-
-                Padding(
-                  padding: EdgeInsets.fromLTRB(40.0, 0, 40.0, 0),
-                  child: Semantics(
-                    label: 'Email input field',
-                    hint: 'Enter your email address',
-                    textField: true,
-                    child: TextField(
-                      controller: emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        labelText: 'Email',
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
+                  Image.asset(
+                    'assets/images/top_login.jpeg',
+                    width: double.infinity,
+                    height: 200,
+                    fit: BoxFit.contain,
                   ),
-                ),
 
-                SizedBox(height: 15),
+                  SizedBox(height: 10,),
 
-                Padding(
-                  padding: EdgeInsets.fromLTRB(40.0, 0, 40.0, 0),
-                  child: Semantics(
-                    label: 'Password input field',
-                    hint: 'Enter your password',
-                    textField: true,
-                    child: TextField(
-                      controller: passwordController,
-                      obscureText: _obscurePassword,
-                      decoration: InputDecoration(
-                        labelText: 'Password',
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(),
-                        suffixIcon: IconButton(
-                          onPressed: () {
-                            setState(() {
-                              _obscurePassword = !_obscurePassword;
-                            });
-                          },
-                          icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(40.0, 0, 40.0, 0),
+                    child: Semantics(
+                      label: 'Email input field',
+                      hint: 'Enter your email address',
+                      textField: true,
+                      child: TextField(
+                        controller: emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(
+                          labelText: 'Email',
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(),
                         ),
                       ),
                     ),
                   ),
-                ),
 
-                SizedBox(height: 10),
+                  SizedBox(height: 15),
 
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(40.0, 0, 40.0, 0),
-                      child: Semantics(
-                        label: 'Forgot password button',
-                        hint: 'Tap to reset your password',
-                        button: true,
-                        child: TextButton(
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/forgot_password');
-                          },
-                          child: Text(
-                            'Forgot Password?',
-                            style: TextStyle(
-                              color: midnightBlue,
-                              fontWeight: FontWeight.bold,
-                            ),
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(40.0, 0, 40.0, 0),
+                    child: Semantics(
+                      label: 'Password input field',
+                      hint: 'Enter your password',
+                      textField: true,
+                      child: TextField(
+                        controller: passwordController,
+                        obscureText: _obscurePassword,
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(),
+                          suffixIcon: IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  _obscurePassword = !_obscurePassword;
+                                });
+                              },
+                              icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
                           ),
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
 
-                SizedBox(height: 40),
+                  SizedBox(height: 10),
 
-                Semantics(
-                  label: 'Login button',
-                  hint: 'Tap to log into your account',
-                  button: true,
-                  child: ElevatedButton(
-                    onPressed: loginUser, // calling the login function
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: midnightBlue,
-                      padding: EdgeInsets.symmetric(horizontal: 100, vertical: 15),
-                    ),
-                    child: Text(
-                      'LOGIN',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(40.0, 0, 40.0, 0),
+                        child: Semantics(
+                          label: 'Forgot password button',
+                          hint: 'Tap to reset your password',
+                          button: true,
+                          child: TextButton(
+                            onPressed: () {
+                              Navigator.pushNamed(context, '/forgot_password');
+                            },
+                            child: Text(
+                              'Forgot Password?',
+                              style: TextStyle(
+                                color: midnightBlue,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: 40),
+
+                  Semantics(
+                    label: 'Login button',
+                    hint: 'Tap to log into your account',
+                    button: true,
+                    child: ElevatedButton(
+                      onPressed: loginUser, // calling the login function
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: midnightBlue,
+                        padding: EdgeInsets.symmetric(horizontal: 100, vertical: 15),
+                      ),
+                      child: Text(
+                        'LOGIN',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
-                ),
 
-                SizedBox(height: 6),
+                  SizedBox(height: 6),
 
-                Semantics(
-                  label: 'Register button',
-                  hint: 'Tap to create a new account',
-                  button: true,
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/register');
-                    },
-                    child: Text(
-                      'Don\'t have an account? Register',
-                      style: TextStyle(
-                        color: midnightBlue,
+                  Semantics(
+                    label: 'Register button',
+                    hint: 'Tap to create a new account',
+                    button: true,
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/register');
+                      },
+                      child: Text(
+                        'Don\'t have an account? Register',
+                        style: TextStyle(
+                          color: midnightBlue,
+                        ),
                       ),
                     ),
                   ),
-                ),
 
-                SizedBox(height: 30),
+                  SizedBox(height: 30),
 
-                Image.asset(
-                  'assets/images/bottom_login.jpeg',
-                  fit: BoxFit.fitWidth,
-                )
+                  Image.asset(
+                    'assets/images/bottom_login.jpeg',
+                    fit: BoxFit.fitWidth,
+                  )
 
-              ],
+                ],
+              ),
             ),
           ),
-        ),
+
+
       ),
+
+      /*bottomNavigationBar: Image.asset(
+      'assets/images/bottom_login.jpeg',
+      fit: BoxFit.fitWidth,
+    )*/
+
     );
   }
 }

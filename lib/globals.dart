@@ -52,3 +52,28 @@ List<Car> globalCars = [];
 
 // Global wishlist list (stores car IDs)
 ValueNotifier<List<int>> wishlistedCarsNotifier = ValueNotifier<List<int>>([]);
+
+class AppLogo extends StatelessWidget {
+  final double size;
+
+  const AppLogo({super.key, this.size = 100});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: size,
+      width: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: Colors.white,
+          width: 2,
+        ),
+        image: const DecorationImage(
+          image: AssetImage("assets/images/logo.jpg"),
+          fit: BoxFit.cover,
+        ),
+      ),
+    );
+  }
+}
