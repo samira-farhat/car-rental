@@ -159,35 +159,6 @@ class _CarDetailsScreenState extends State<CarDetailsScreen> {
 
                       SizedBox(width: 16),
 
-                      // wishlist heart icon
-                      ValueListenableBuilder<List<int>>(
-                        valueListenable: wishlistedCarsNotifier,
-                        builder: (context, wishlisted, child) {
-                          final isWishlisted =
-                          wishlisted.contains(widget.car.carId);
-
-                          return IconButton(
-                            onPressed: () {
-                              if (isWishlisted) {
-                                wishlistedCarsNotifier.value =
-                                List.from(wishlisted)
-                                  ..remove(widget.car.carId);
-                              } else {
-                                wishlistedCarsNotifier.value =
-                                List.from(wishlisted)
-                                  ..add(widget.car.carId);
-                              }
-                            },
-                            icon: Icon(
-                              isWishlisted
-                                  ? Icons.favorite
-                                  : Icons.favorite_border,
-                              color: isWishlisted ? Colors.red : midnightBlue,
-                            ),
-                            iconSize: 30,
-                          );
-                        },
-                      ),
                     ],
                   ),
                 ],
