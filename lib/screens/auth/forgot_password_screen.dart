@@ -24,7 +24,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final uri = Uri.parse('http://192.168.0.110:8000/api/accounts/forgot-password/');
+      //Samira
+      //final uri = Uri.parse('http://192.168.0.110:8000/api/accounts/forgot-password/');
+      //Mohammad
+      final uri = Uri.parse('http://192.168.10.20:8000/api/accounts/forgot-password/');
       final response = await http.post(
         uri,
         headers: {'Content-Type': 'application/json'},

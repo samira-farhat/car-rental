@@ -39,10 +39,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-
     'accounts',
     'cars',
     'wishlist',
+    'reviews',
+    'rest_framework_simplejwt',
+    'rentals',
 ]
 
 MIDDLEWARE = [
@@ -92,7 +94,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql', # to use MySQL
         'NAME': 'CarRentalDB', # our database name
         'USER': 'root', # MySQL username
-        'PASSWORD': 'Root', # MySQL password
+        'PASSWORD': 'root', # MySQL password
         'HOST': 'localhost', # host
         'PORT': '3306', # default MySQL port
     }
