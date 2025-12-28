@@ -31,11 +31,11 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
     //Samira
-    //final url = Uri.parse('http://192.168.0.110:8000/api/accounts/login/');
-    final url = Uri.parse(
-      //Mohammad
-        'http://192.168.10.20:8000/api/accounts/login/'
-    );
+    final url = Uri.parse('http://192.168.0.110:8000/api/accounts/login/');
+    // final url = Uri.parse(
+    //   //Mohammad
+    //     'http://192.168.10.20:8000/api/accounts/login/'
+    // );
 
     try {
       final response = await http.post(

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/car_model.dart';
 import '../../globals.dart';
-import '../features/wishlist/widgets/wishlist_button.dart';
 import 'rent_screen.dart';
 import 'reserve_screen.dart';
 
@@ -159,9 +158,6 @@ class _CarDetailsScreenState extends State<CarDetailsScreen> {
                       ),
 
                       SizedBox(width: 16),
-
-                      // wishlist heart icon
-                      WishlistButton(carId: widget.car.carId, initiallyWishlisted: false)
 
                     ],
                   ),
