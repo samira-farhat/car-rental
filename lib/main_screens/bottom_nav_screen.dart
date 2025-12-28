@@ -3,6 +3,7 @@ import 'package:car_management_frontend/screens/customer_screens/search_screen.d
 import 'package:car_management_frontend/screens/customer_screens/wishlist_screen.dart';
 import 'package:flutter/material.dart';
 import '../screens/customer_screens/browse_screen.dart';
+import '../screens/features/reviews_screen.dart';
 import 'home_screen.dart';
 import '../screens/auth/login_screen.dart';
 import '../globals.dart';
@@ -29,7 +30,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
 
     _pages = [
       BrowseScreen(isGuest: widget.isGuest), // First tab: Browse cars
-      SearchScreen(), // Second tab: Search
+      CarReviewPage(), // Second tab: Search
       WishlistScreen(), // Third tab: Wishlist
       ProfileScreen(), // Fourth tab: Profile
     ];

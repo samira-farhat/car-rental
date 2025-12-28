@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../../main_screens/bottom_nav_screen.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 
 class LoginScreen extends StatefulWidget {
@@ -13,7 +14,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-
+  final storage = const FlutterSecureStorage();
   // color to use
   final Color midnightBlue = Color(0xFF004760);
 
@@ -46,19 +47,24 @@ class _LoginScreenState extends State<LoginScreen> {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        // Successful login
+        final data = jsonDecode(response.body);
+        final token = data['access']; // or whatever your login API returns
+
+        // Save token securely
+        await storage.write(key: 'access', value: token);
+
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("Login successful!"))
         );
 
-        // Navigate to browse screen
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (_) => BottomNavScreen(isGuest: false),
           ),
         );
-      }else {
+      }
+      else {
         // Error (like invalid credentials)
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(data['error'] ?? 'Login failed'))

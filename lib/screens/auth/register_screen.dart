@@ -24,7 +24,7 @@ Future<Map<String, dynamic>> registerUser({
   //final uri= Uri.parse('http://192.168.0.110:8000/api/accounts/register/');
   final uri = Uri.parse(
     //Mohammad
-    'http://192.168.10.20/api/accounts/register/',
+    'http://192.168.10.20:8000/api/accounts/register/',
   );
 
   var request = http.MultipartRequest('POST', uri);
