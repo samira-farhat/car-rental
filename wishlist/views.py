@@ -15,7 +15,7 @@ class WishlistListCreateView(generics.ListCreateAPIView):
         return Wishlist.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        car_id = self.request.data.get('car_id')  # gets car id from frontend
+        car_id = self.request.data.get('carid')  # gets car id from frontend
         try:
             car = Car.objects.get(carid=car_id)
         except Car.DoesNotExist:
