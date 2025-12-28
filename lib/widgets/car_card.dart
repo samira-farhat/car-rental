@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/car_model.dart';
 import '../screens/customer_screens/rent_screen.dart';
 import '../screens/customer_screens/reserve_screen.dart';
@@ -161,8 +162,9 @@ class _CarCardState extends State<CarCard> {
                         if (widget.isGuest) {
                           Navigator.pushNamed(context, '/login');
                         } else {
-                          SharedPreferences prefs = await SharedPreferences.getInstance();
-                          String? token = prefs.getString('access_token');
+                          final storage = const FlutterSecureStorage();
+                          final token = await storage.read(key: 'access');
+
 
                           if (isWishlisted) {
                             // to remove from our local notifier
@@ -171,7 +173,7 @@ class _CarCardState extends State<CarCard> {
 
                             // to remove from backend
                             final url = Uri.parse(
-                                'http://localhost:8000/api/wishlist/${widget.car.carId}/');
+                                'http://192.168.0.105:8000/api/wishlist/${widget.car.carId}/');
                             await http.delete(
                               url,
                               headers: {
@@ -186,14 +188,14 @@ class _CarCardState extends State<CarCard> {
                             List.from(wishlisted)..add(widget.car.carId);
 
                             // add to backend
-                            final url = Uri.parse('http://localhost:8000/api/wishlist/');
+                            final url = Uri.parse('http://192.168.0.105:8000/api/wishlist/');
                             await http.post(
                               url,
                               headers: {
                                 'Content-Type': 'application/json',
                                 'Authorization': 'Bearer $token',
                               },
-                              body: jsonEncode({'car_id': widget.car.carId}),
+                              body: jsonEncode({'carid': widget.car.carId}),
                             );
 
                           }

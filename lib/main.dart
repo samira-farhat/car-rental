@@ -14,7 +14,7 @@ void main() async {
 
   // restore jwt token on app start
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  authToken = prefs.getString('access_token');
+  authToken = prefs.getString('access');
 
   runApp(
     ProviderScope(
