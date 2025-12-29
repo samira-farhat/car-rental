@@ -156,7 +156,7 @@ class _CarDetailsScreenState extends State<CarDetailsScreen> {
 
                                 // remove backend
                                 final url = Uri.parse(
-                                    'http://192.168.0.105:8000/api/wishlist/${widget.car.carId}/');
+                                    'http://localhost:8000/api/wishlist/${widget.car.carId}/');
                                 await http.delete(
                                   url,
                                   headers: {
@@ -171,7 +171,7 @@ class _CarDetailsScreenState extends State<CarDetailsScreen> {
 
                                 // add backend
                                 final url = Uri.parse(
-                                    'http://192.168.0.105:8000/api/wishlist/');
+                                    'http://localhost:8000/api/wishlist/');
                                 await http.post(
                                   url,
                                   headers: {

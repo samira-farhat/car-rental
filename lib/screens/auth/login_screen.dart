@@ -31,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
     //Samira
-    // final url = Uri.parse('http://local:8000/api/accounts/login/');
+    // final url = Uri.parse('http://localhost:8000/api/accounts/login/');
     final url = Uri.parse(
       //Mohammad
         'http://localhost:8000/api/accounts/login/'
