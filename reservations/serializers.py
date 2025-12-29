@@ -18,6 +18,7 @@ class AdminCarSerializer(serializers.ModelSerializer):
         model = Car
         fields = [
             'carid',
+            'vin',
             'car_name',
             'image',
             'rentalpriceperday',
@@ -32,16 +33,9 @@ class AdminCarSerializer(serializers.ModelSerializer):
 class AdminReservationListSerializer(serializers.ModelSerializer):
     """
     Serializer used for the admin reservation LIST screen.
-    Optimized for tables / cards (no heavy nested data).
     """
 
-    # Read user's full name from the User model
-    user_name = serializers.CharField(
-        source='user.get_full_name',
-        read_only=True
-    )
-
-    # Nested car information
+    user_name = serializers.SerializerMethodField()
     car = AdminCarSerializer(read_only=True)
 
     class Meta:
@@ -56,24 +50,58 @@ class AdminReservationListSerializer(serializers.ModelSerializer):
             'createdat'
         ]
 
+    def get_user_name(self, obj):
+        user = obj.user
+        if not user:
+            return "Unknown User"
+
+        # Works whether or not get_full_name exists
+        first = getattr(user, 'first_name', '')
+        last = getattr(user, 'last_name', '')
+        full_name = f"{first} {last}".strip()
+
+        return full_name if full_name else user.email
+
 class AdminReservationDetailSerializer(serializers.ModelSerializer):
     """
     Serializer for viewing FULL reservation details.
     Used when admin taps on a reservation.
     """
 
-    user_name = serializers.CharField(
-        source='user.get_full_name',
-        read_only=True
-    )
-
+    user_name = serializers.SerializerMethodField()
     user_phone = serializers.CharField(
         source='user.phone',
         read_only=True
     )
-
+    user_email = serializers.CharField(
+        source='user.email',
+        read_only=True
+    )
     car = AdminCarSerializer(read_only=True)
+    
+    duration = serializers.SerializerMethodField()
+    total_amount = serializers.SerializerMethodField()
+    
+    def get_user_name(self, obj):
+        user = obj.user
+        if not user:
+            return "Unknown User"
 
+        # Works whether or not get_full_name exists
+        first = getattr(user, 'first_name', '')
+        last = getattr(user, 'last_name', '')
+        full_name = f"{first} {last}".strip()
+
+        return full_name if full_name else user.email
+    
+    def get_duration(self, obj):
+        # Inclusive days
+        return (obj.enddate - obj.startdate).days + 1
+
+    def get_total_amount(self, obj):
+        duration = (obj.enddate - obj.startdate).days + 1
+        return duration * obj.car.rentalpriceperday
+    
     class Meta:
         model = Reservation
         fields = '__all__'
