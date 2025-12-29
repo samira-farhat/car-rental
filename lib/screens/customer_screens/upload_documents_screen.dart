@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'dart:typed_data';
+import 'package:file_picker/file_picker.dart';
+import 'package:http/http.dart' as http;
 
 class UploadDocumentsScreen extends StatefulWidget {
   const UploadDocumentsScreen({Key? key}) : super(key: key);
@@ -10,8 +13,11 @@ class UploadDocumentsScreen extends StatefulWidget {
 class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
   String _selectedDocument = 'Driver\'s License';
   String? _selectedFileName;
+  Uint8List? _selectedFileBytes;
+
   final TextEditingController _notesController = TextEditingController();
   bool _uploadSuccess = false;
+  bool _isUploading = false;
 
   final List<String> _documentTypes = [
     'Driver\'s License',
@@ -19,16 +25,29 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
     'Passport',
   ];
 
-  void _pickFile() {
-    // FRONTEND MOCK (no real picker yet)
-    setState(() {
-      _selectedFileName = 'document_sample.pdf';
-      _uploadSuccess = false;
-    });
+  // 🔐 TEMP: replace later with secure storage
+  static const String ACCESS_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY3MDM5NDA0LCJpYXQiOjE3NjcwMzkxMDQsImp0aSI6IjgxY2MzMDE5Mjg5ZjRhYTFhZmYzOTkyOTFlZGYwOTJkIiwidXNlcl9pZCI6IjEifQ.TRRIS0J_3KBkOjn1WdZ6WUnbDVDMxhfWeJadA94p188";
+
+  // ================= FILE PICKER (WEB) =================
+  Future<void> _pickFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['jpg', 'png', 'pdf'],
+      withData: true,
+    );
+
+    if (result != null && result.files.single.bytes != null) {
+      setState(() {
+        _selectedFileBytes = result.files.single.bytes;
+        _selectedFileName = result.files.single.name;
+        _uploadSuccess = false;
+      });
+    }
   }
 
-  void _uploadDocument() {
-    if (_selectedFileName == null) {
+  // ================= UPLOAD TO BACKEND =================
+  Future<void> _uploadDocument() async {
+    if (_selectedFileBytes == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please choose a file first'),
@@ -38,22 +57,61 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
       return;
     }
 
-    setState(() {
-      _uploadSuccess = true;
-    });
+    setState(() => _isUploading = true);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Document uploaded successfully (frontend only)'),
-        backgroundColor: Colors.green,
-      ),
-    );
+    try {
+      final uri =
+      Uri.parse("http://127.0.0.1:8000/api/documents/upload/");
+
+      final request = http.MultipartRequest("POST", uri);
+
+      request.headers['Authorization'] = 'Bearer $ACCESS_TOKEN';
+
+      request.fields['document_type'] = _selectedDocument;
+      request.fields['notes'] = _notesController.text;
+
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'document_image',
+          _selectedFileBytes!,
+          filename: _selectedFileName,
+        ),
+      );
+
+      final response = await request.send();
+
+      if (response.statusCode == 201) {
+        setState(() {
+          _uploadSuccess = true;
+          _isUploading = false;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Document uploaded successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        throw Exception("Upload failed: ${response.statusCode}");
+      }
+    } catch (e) {
+      setState(() => _isUploading = false);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Upload error: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _cancel() {
     Navigator.pop(context);
   }
 
+  // ================= UI =================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -75,7 +133,6 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(20),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 20),
 
@@ -105,35 +162,20 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
 
                 // 🔹 Document Type
                 _whiteCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "Document Type",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      DropdownButtonFormField<String>(
-                        value: _selectedDocument,
-                        items: _documentTypes
-                            .map(
-                              (type) => DropdownMenuItem(
-                            value: type,
-                            child: Text(type),
-                          ),
-                        )
-                            .toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedDocument = value!;
-                          });
-                        },
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          isDense: true,
-                        ),
-                      ),
-                    ],
+                  child: DropdownButtonFormField<String>(
+                    value: _selectedDocument,
+                    items: _documentTypes
+                        .map((type) => DropdownMenuItem(
+                      value: type,
+                      child: Text(type),
+                    ))
+                        .toList(),
+                    onChanged: (value) =>
+                        setState(() => _selectedDocument = value!),
+                    decoration: const InputDecoration(
+                      labelText: "Document Type",
+                      border: OutlineInputBorder(),
+                    ),
                   ),
                 ),
 
@@ -141,48 +183,21 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
 
                 // 🔹 File Upload
                 _whiteCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "File Upload",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 10),
-
-                      GestureDetector(
-                        onTap: _pickFile,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 14, horizontal: 16),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey.shade300),
+                  child: GestureDetector(
+                    onTap: _pickFile,
+                    child: Row(
+                      children: [
+                        const Icon(Icons.upload_file),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            _selectedFileName ?? "Choose file",
+                            style:
+                            const TextStyle(color: Colors.black54),
                           ),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.upload_file),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  _selectedFileName ?? "Choose file",
-                                  style: const TextStyle(color: Colors.black54),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      if (_selectedFileName != null) ...[
-                        const SizedBox(height: 10),
-                        const Text(
-                          "Preview ready (image / PDF)",
-                          style: TextStyle(color: Colors.green),
                         ),
                       ],
-                    ],
+                    ),
                   ),
                 ),
 
@@ -190,24 +205,13 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
 
                 // 🔹 Notes
                 _whiteCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "Notes (optional)",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      TextField(
-                        controller: _notesController,
-                        maxLines: 3,
-                        decoration: const InputDecoration(
-                          hintText: "Add any additional information",
-                          border: OutlineInputBorder(),
-                          isDense: true,
-                        ),
-                      ),
-                    ],
+                  child: TextField(
+                    controller: _notesController,
+                    maxLines: 3,
+                    decoration: const InputDecoration(
+                      labelText: "Notes (optional)",
+                      border: OutlineInputBorder(),
+                    ),
                   ),
                 ),
 
@@ -218,14 +222,17 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                   width: double.infinity,
                   height: 48,
                   child: ElevatedButton(
+                    onPressed: _isUploading ? null : _uploadDocument,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF49C5E0),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),
                     ),
-                    onPressed: _uploadDocument,
-                    child: const Text(
+                    child: _isUploading
+                        ? const CircularProgressIndicator(
+                        color: Colors.white)
+                        : const Text(
                       "UPLOAD",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
@@ -237,30 +244,17 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
 
                 const SizedBox(height: 12),
 
-                // 🔹 Cancel Button
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.white),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                    onPressed: _cancel,
-                    child: const Text(
-                      "CANCEL",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
+                // 🔹 Cancel
+                OutlinedButton(
+                  onPressed: _cancel,
+                  child: const Text("CANCEL",
+                      style: TextStyle(color: Colors.white)),
                 ),
 
                 if (_uploadSuccess) ...[
                   const SizedBox(height: 16),
                   const Icon(Icons.check_circle,
                       color: Colors.green, size: 36),
-                  const SizedBox(height: 6),
                   const Text(
                     "Document Uploaded Successfully",
                     style: TextStyle(color: Colors.white),
@@ -274,11 +268,8 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
     );
   }
 
-  // ================= HELPERS =================
-
   Widget _whiteCard({required Widget child}) {
     return Container(
-      width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
