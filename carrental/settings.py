@@ -44,7 +44,9 @@ INSTALLED_APPS = [
     'wishlist',
     'reviews',
     'rest_framework_simplejwt',
+    'reservations',
     'rentals',
+    
 ]
 
 MIDDLEWARE = [
