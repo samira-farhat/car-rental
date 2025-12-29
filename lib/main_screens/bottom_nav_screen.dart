@@ -1,3 +1,4 @@
+import 'package:car_management_frontend/screens/customer_screens/my_rentals_screen.dart';
 import 'package:car_management_frontend/screens/customer_screens/profile_screen.dart';
 import 'package:car_management_frontend/screens/customer_screens/search_screen.dart';
 import 'package:car_management_frontend/screens/customer_screens/wishlist_screen.dart';
@@ -27,9 +28,10 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
 
     _pages = [
       Builder(builder: (_) => BrowseScreen(isGuest: widget.isGuest)), // first tab: browse cars
-      Builder(builder: (_) => CarReviewPage()), // second tab: search
-      Builder(builder: (_) => WishlistScreen()), // third tab: wishlist
-      Builder(builder: (_) => ProfileScreen()), // fourth tab: profile
+      Builder(builder: (_) => SearchScreen()), // second tab: search
+      Builder(builder: (_) => MyRentalsScreen()), // third tab: rentals (center)
+      Builder(builder: (_) => WishlistScreen()), // fourth tab: wishlist
+      Builder(builder: (_) => ProfileScreen()), // fifth tab: profile
     ];
   }
 
@@ -57,24 +59,47 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
         unselectedItemColor: Colors.grey,
         showUnselectedLabels: true,
         type: BottomNavigationBarType.fixed,
+
         items: [
+
           BottomNavigationBarItem(
             icon: Icon(Icons.directions_car),
             label: 'Browse',
           ),
+
           BottomNavigationBarItem(
             icon: Icon(Icons.search),
             label: 'Search',
           ),
+
+          // CENTER – My Rentals
+          BottomNavigationBarItem(
+            icon: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: midnightBlue,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.receipt_long, // rentals icon
+                color: Colors.white,
+                size: 26,
+              ),
+            ),
+            label: 'Rentals',
+          ),
+
           BottomNavigationBarItem(
             icon: Icon(Icons.favorite),
             label: 'Wishlist',
           ),
+
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Profile',
           ),
         ],
+
       ),
     );
   }
