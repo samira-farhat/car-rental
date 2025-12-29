@@ -2,6 +2,7 @@ import 'package:car_management_frontend/screens/customer_screens/profile_screen.
 import 'package:car_management_frontend/screens/customer_screens/search_screen.dart';
 import 'package:car_management_frontend/screens/customer_screens/wishlist_screen.dart';
 import 'package:flutter/material.dart';
+import '../manage_screens/admin_reservations_page.dart';
 import '../screens/customer_screens/browse_screen.dart';
 import '../screens/features/reviews_screen.dart';
 
@@ -27,7 +28,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
 
     _pages = [
       Builder(builder: (_) => BrowseScreen(isGuest: widget.isGuest)), // first tab: browse cars
-      Builder(builder: (_) => CarReviewPage()), // second tab: search
+      Builder(builder: (_) => AdminReservationsPage()), // second tab: search
       Builder(builder: (_) => WishlistScreen()), // third tab: wishlist
       Builder(builder: (_) => ProfileScreen()), // fourth tab: profile
     ];

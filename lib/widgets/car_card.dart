@@ -173,7 +173,7 @@ class _CarCardState extends State<CarCard> {
 
                             // to remove from backend
                             final url = Uri.parse(
-                                'http://192.168.0.105:8000/api/wishlist/${widget.car.carId}/');
+                                'http://localhost:8000/api/wishlist/${widget.car.carId}/');
                             await http.delete(
                               url,
                               headers: {
@@ -188,7 +188,7 @@ class _CarCardState extends State<CarCard> {
                             List.from(wishlisted)..add(widget.car.carId);
 
                             // add to backend
-                            final url = Uri.parse('http://192.168.0.105:8000/api/wishlist/');
+                            final url = Uri.parse('http://localhost:8000/api/wishlist/');
                             await http.post(
                               url,
                               headers: {
