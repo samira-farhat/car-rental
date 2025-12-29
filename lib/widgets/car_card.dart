@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/car_model.dart';
 import '../screens/customer_screens/rent_screen.dart';
 import '../screens/customer_screens/reserve_screen.dart';
@@ -57,7 +58,7 @@ class _CarCardState extends State<CarCard> {
                   child: Image.network(
                     widget.car.imageUrl,
                     width: 110,
-                    height: 80,
+                    height: 90,
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -69,6 +70,7 @@ class _CarCardState extends State<CarCard> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+
                       Text(
                         "${widget.car.brand} ${widget.car.model}",
                         style: TextStyle(
@@ -88,7 +90,7 @@ class _CarCardState extends State<CarCard> {
                         ),
                       ),
 
-                      SizedBox(height: 8),
+                      SizedBox(height: 6),
 
                       Text(
                         "\$${widget.car.rentalPricePerDay} / day",
@@ -98,116 +100,108 @@ class _CarCardState extends State<CarCard> {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
+
+                      SizedBox(height: 6),
+
+                      Text(
+                        widget.car.availabilityStatus,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: widget.car.availabilityStatus.toLowerCase() == "available"
+                              ? Colors.green
+                              : Colors.red,
+                        ),
+                      ),
+
                     ],
                   ),
                 ),
-              ],
-            ),
 
-            SizedBox(height: 8),
+                // fav icon & reserve button
+                Column(
+                  children: [
 
-            // Buttons Row
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Rent Button
-                TextButton(
-                  onPressed: () {
-                    if (widget.isGuest) {
-                      Navigator.pushNamed(context, '/login'); // go to login for guests
-                    } else {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => RentScreen(carId: widget.car.carId),
-                        ),
-                      );
-                    }
-                  },
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.blue,
-                  ),
-                  child: Text('Rent'),
-                ),
+                    // Wishlist Heart
+                    ValueListenableBuilder<List<int>>(
+                      valueListenable: wishlistedCarsNotifier,
+                      builder: (context, wishlisted, child) {
+                        final isWishlisted = wishlisted.contains(widget.car.carId);
 
-                // Reserve Button
-                TextButton(
-                  onPressed: () {
-                    if (widget.isGuest) {
-                      Navigator.pushNamed(context, '/login'); // go to login for guests
-                    } else {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ReserveScreen(carId: widget.car.carId),
-                        ),
-                      );
-                    }
-                  },
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.green,
-                  ),
-                  child: Text('Reserve'),
-                ),
+                        return IconButton(
+                          icon: Icon(
+                            isWishlisted ? Icons.favorite : Icons.favorite_border,
+                            color: isWishlisted ? Colors.red : Colors.grey,
+                          ),
+                          onPressed: () async {
+                            if (widget.isGuest) {
+                              Navigator.pushNamed(context, '/login');
+                            } else {
+                              final storage = const FlutterSecureStorage();
+                              final token = await storage.read(key: 'access');
 
-                // Wishlist Heart Icon using ValueListenableBuilder
-                ValueListenableBuilder<List<int>>(
-                  valueListenable: wishlistedCarsNotifier,
-                  builder: (context, wishlisted, child) {
-                    final isWishlisted = wishlisted.contains(widget.car.carId);
+                              if (isWishlisted) {
+                                wishlistedCarsNotifier.value =
+                                List.from(wishlisted)..remove(widget.car.carId);
 
-                    return IconButton(
-                      onPressed: () async {
+                                final url = Uri.parse(
+                                    'http://localhost:8000/api/wishlist/${widget.car.carId}/');
+                                await http.delete(
+                                  url,
+                                  headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': 'Bearer $token',
+                                  },
+                                );
+                              } else {
+                                wishlistedCarsNotifier.value =
+                                List.from(wishlisted)..add(widget.car.carId);
+
+                                final url = Uri.parse(
+                                    'http://localhost:8000/api/wishlist/');
+                                await http.post(
+                                  url,
+                                  headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': 'Bearer $token',
+                                  },
+                                  body: jsonEncode({'carid': widget.car.carId}),
+                                );
+                              }
+                            }
+                          },
+                        );
+                      },
+                    ),
+
+                    SizedBox(height: 5),
+
+                    // Reserve Button
+                    TextButton(
+                      onPressed: () {
                         if (widget.isGuest) {
                           Navigator.pushNamed(context, '/login');
                         } else {
-                          SharedPreferences prefs = await SharedPreferences.getInstance();
-                          String? token = prefs.getString('access_token');
-
-                          if (isWishlisted) {
-                            // to remove from our local notifier
-                            wishlistedCarsNotifier.value =
-                            List.from(wishlisted)..remove(widget.car.carId);
-
-                            // to remove from backend
-                            final url = Uri.parse(
-                                'http://localhost:8000/api/wishlist/${widget.car.carId}/');
-                            await http.delete(
-                              url,
-                              headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': 'Bearer $token',
-                              },
-                            );
-
-                          } else {
-                            // add to local notifier
-                            wishlistedCarsNotifier.value =
-                            List.from(wishlisted)..add(widget.car.carId);
-
-                            // add to backend
-                            final url = Uri.parse('http://localhost:8000/api/wishlist/');
-                            await http.post(
-                              url,
-                              headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': 'Bearer $token',
-                              },
-                              body: jsonEncode({'car_id': widget.car.carId}),
-                            );
-
-                          }
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  ReserveScreen(carId: widget.car.carId),
+                            ),
+                          );
                         }
                       },
-                      icon: Icon(
-                        isWishlisted ? Icons.favorite : Icons.favorite_border,
-                        color: isWishlisted ? Colors.red : Colors.grey,
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.green,
                       ),
-                    );
-                  },
+                      child: Text('Reserve'),
+                    ),
+                  ],
                 ),
+
               ],
             ),
+
           ],
         ),
       ),

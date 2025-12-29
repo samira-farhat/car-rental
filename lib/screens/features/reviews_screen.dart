@@ -58,7 +58,7 @@ class _CarReviewPageCombinedState extends State<CarReviewPage>
 
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.10.20:8000/api/rentals/rented-cars/'),
+        Uri.parse('http://localhost:8000/api/rentals/rented-cars/'),
         headers: {'Authorization': 'Bearer $token'},
       );
 
@@ -113,7 +113,7 @@ class _CarReviewPageCombinedState extends State<CarReviewPage>
     if (token == null) return;
 
     final response = await http.post(
-      Uri.parse('http://192.168.10.20:8000/api/reviews/submit/'),
+      Uri.parse('http://localhost:8000/api/reviews/submit/'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -213,7 +213,7 @@ class _CarReviewPageCombinedState extends State<CarReviewPage>
                           image: car['car_image'] != null
                               ? DecorationImage(
                             image: NetworkImage(
-                              'http://192.168.10.20:8000/media/${car['car_image']}',
+                              'http://localhost:8000/media/${car['car_image']}',
                             ),
                             fit: BoxFit.cover,
                           )
@@ -353,7 +353,7 @@ class _CarReviewPageCombinedState extends State<CarReviewPage>
                                             borderRadius: BorderRadius.circular(12),
                                             image: DecorationImage(
                                               image: NetworkImage(
-                                                'http://192.168.10.20:8000/media/$selectedCarImage',
+                                                'http://localhost:8000/media/$selectedCarImage',
                                               ),
                                               fit: BoxFit.cover,
                                             ),

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import '../../globals.dart';
 import '../../models/car_model.dart';
@@ -39,8 +40,9 @@ class _BrowseScreenState extends State<BrowseScreen> {
       isLoading = true;
     });
 
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('access_token');
+    final storage = const FlutterSecureStorage();
+    final token = await storage.read(key: 'access');
+
 
     // Clear wishlist if guest
     if (widget.isGuest) {

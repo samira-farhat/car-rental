@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -25,8 +26,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
   }
 
   Future<void> fetchWishlist() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('access_token');
+    final storage = const FlutterSecureStorage();
+    final token = await storage.read(key: 'access');
 
     if (token == null) return; // no token, user not logged in
 
@@ -66,8 +67,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
   }
 
   Future<void> removeFromWishlist(int carId) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('access_token');
+    final storage = const FlutterSecureStorage();
+    final token = await storage.read(key: 'access');
     if (token == null) return;
 
     final url = Uri.parse('http://localhost:8000/api/wishlist/$carId/');
