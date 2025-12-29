@@ -87,6 +87,20 @@ class _CarDetailsScreenState extends State<CarDetailsScreen> {
                     ),
                   ),
 
+                  SizedBox(height: 5),
+
+                  // cars availability status
+                  Text(
+                    widget.car.availabilityStatus,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: widget.car.availabilityStatus.toLowerCase() == "available"
+                          ? Colors.green
+                          : Colors.red,
+                    ),
+                  ),
+
                   SizedBox(height: 18),
 
                   // car description
