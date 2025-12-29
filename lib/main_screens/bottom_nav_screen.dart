@@ -2,7 +2,7 @@ import 'package:car_management_frontend/screens/customer_screens/profile_screen.
 import 'package:car_management_frontend/screens/customer_screens/search_screen.dart';
 import 'package:car_management_frontend/screens/customer_screens/wishlist_screen.dart';
 import 'package:flutter/material.dart';
-import '../manage_screens/admin_reservations_page.dart';
+import '../manager_screens/admin_reservations_page.dart';
 import '../screens/customer_screens/browse_screen.dart';
 import '../screens/features/reviews_screen.dart';
 
