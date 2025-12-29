@@ -2,7 +2,7 @@
 // This matches the AdminReservationListSerializer JSON
 
 class Reservation {
-  final int id;
+  final int reservationid;
   final String userName;
   final String carName;
   final String carImage;
@@ -12,7 +12,7 @@ class Reservation {
   final DateTime endDate;
 
   Reservation({
-    required this.id,
+    required this.reservationid,
     required this.userName,
     required this.carName,
     required this.carImage,
@@ -25,12 +25,12 @@ class Reservation {
   // Factory constructor to convert JSON → Dart object
   factory Reservation.fromJson(Map<String, dynamic> json) {
     return Reservation(
-      id: json['reservationid'],
-      userName: json['user_name'],
-      carName: json['car']['car_name'],
+      reservationid: json['reservationid'] ?? 0,
+      userName: json['user_name'] ?? 'unknown user',
+      carName: json['car']['car_name'] ?? '',
       carImage: json['car']['image'] ?? '',
-      pricePerDay: double.parse(json['car']['rentalpriceperday']),
-      status: json['status'],
+      pricePerDay: double.parse(json['car']['rentalpriceperday']) ?? 0,
+      status: json['status'] ?? '',
       startDate: DateTime.parse(json['startdate']),
       endDate: DateTime.parse(json['enddate']),
     );

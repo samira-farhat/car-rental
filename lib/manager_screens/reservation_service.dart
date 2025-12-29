@@ -14,7 +14,7 @@ class ReservationService {
 
   /// Helper method to build authorization headers
   static Future<Map<String, String>> _headers() async {
-    final token = await _storage.read(key: 'access_token');
+    final token = await _storage.read(key: 'access');
 
     return {
       'Authorization': 'Bearer $token',
@@ -33,7 +33,6 @@ class ReservationService {
 
     if (response.statusCode == 200) {
       final List data = json.decode(response.body);
-
       // Convert each JSON object into a Reservation instance
       return data.map((e) => Reservation.fromJson(e)).toList();
     } else {
