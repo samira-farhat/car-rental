@@ -29,7 +29,11 @@ class Car(models.Model):
         blank=True,
         null=True
     )
-    image = models.CharField(db_column='Image', max_length=255, blank=True, null=True)
+    image = models.ImageField(
+        upload_to='cars/',      # saves images to media/cars/
+        blank=True,
+        null=True
+    )
     createdat = models.DateTimeField(db_column='CreatedAt', blank=True, null=True)
 
     class Meta:
