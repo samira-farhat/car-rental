@@ -1,3 +1,4 @@
+import 'package:car_management_frontend/screens/customer_screens/my_rentals_screen.dart';
 import 'package:car_management_frontend/screens/customer_screens/profile_screen.dart';
 import 'package:car_management_frontend/screens/customer_screens/search_screen.dart';
 import 'package:car_management_frontend/screens/customer_screens/wishlist_screen.dart';
@@ -30,8 +31,9 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
     _pages = [
       Builder(builder: (_) => BrowseScreen(isGuest: widget.isGuest)), // first tab: browse cars
       Builder(builder: (_) => AdminCarsPage()), // second tab: search
-      Builder(builder: (_) => WishlistScreen()), // third tab: wishlist
-      Builder(builder: (_) => ProfileScreen()), // fourth tab: profile
+      Builder(builder: (_) => MyRentalsScreen()), // third tab: my rentals
+      Builder(builder: (_) => WishlistScreen()), // fourth tab: wishlist
+      Builder(builder: (_) => ProfileScreen()), // fifth tab: profile
     ];
   }
 
@@ -68,6 +70,24 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
             icon: Icon(Icons.search),
             label: 'Search',
           ),
+
+          // CENTER – My Rentals
+          BottomNavigationBarItem(
+            icon: Container(
+              padding: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: midnightBlue,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                Icons.receipt_long, // rentals icon
+                color: Colors.white,
+                size: 26,
+              ),
+            ),
+            label: 'Rentals',
+          ),
+
           BottomNavigationBarItem(
             icon: Icon(Icons.favorite),
             label: 'Wishlist',
@@ -77,6 +97,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
             label: 'Profile',
           ),
         ],
+
       ),
     );
   }
