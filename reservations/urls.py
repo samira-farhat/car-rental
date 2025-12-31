@@ -6,14 +6,20 @@ from .views import (
     AdminReservationListView,
     AdminReservationDetailView,
     ApproveReservationView,
-    RejectReservationView
+    RejectReservationView, 
+    CreateReservationView,
+    CarReservedDatesView
 )
+
 
 urlpatterns = [
     path('admin/reservations/', AdminReservationListView.as_view()),
     path('admin/reservations/<int:pk>/', AdminReservationDetailView.as_view()),
     path('admin/reservations/<int:pk>/approve/', ApproveReservationView.as_view()),
     path('admin/reservations/<int:pk>/reject/', RejectReservationView.as_view()),
+    path('reservations/', CreateReservationView.as_view()),
+    path('reservations/car/<int:car_id>/dates/', CarReservedDatesView.as_view()),
+
 ]
 
 if settings.DEBUG:

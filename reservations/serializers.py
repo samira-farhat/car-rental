@@ -121,6 +121,33 @@ class AdminReservationDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reservation
         fields = '__all__'
+
+
+
+
+# Serializer used by customers to create a reservation.
+class CreateReservationSerializer(serializers.ModelSerializer):
+   
+
+    class Meta:
+        model = Reservation
+        fields = [
+            'car',
+            'startdate',
+            'enddate',
+        ]
+
+    def validate(self, data):
+        start = data['startdate']
+        end = data['enddate']
+
+        if start >= end:
+            raise serializers.ValidationError(
+                "End date must be after start date."
+            )
+
+        return data
+
         
 class UserLicenseSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()

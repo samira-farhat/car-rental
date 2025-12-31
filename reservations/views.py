@@ -17,6 +17,10 @@ from .serializers import (
     AdminReservationDetailSerializer
 )
 
+from rest_framework.permissions import IsAuthenticated
+from .serializers import CreateReservationSerializer
+
+
 class AdminReservationListView(APIView):
     """
     Returns a list of reservations for admin users.
@@ -212,3 +216,84 @@ class RejectReservationView(APIView):
             {'message': 'Reservation rejected successfully'},
             status=status.HTTP_200_OK
         )
+
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from django.db.models import Q
+
+from .models import Reservation
+from .serializers import CreateReservationSerializer
+
+
+# customer endpoint
+# creates a reservation request (sets status = pending)
+class CreateReservationView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = CreateReservationSerializer(data=request.data)
+
+        if not serializer.is_valid():
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        car = serializer.validated_data['car']
+        startdate = serializer.validated_data['startdate']
+        enddate = serializer.validated_data['enddate']
+
+        # ensure car is available
+        if car.availabilitystatus != 'available':
+            return Response(
+                {'error': 'Car is not available'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # check for duplicate / overlapping reservation
+        conflict = Reservation.objects.filter(
+            car=car,
+            startdate__lte=enddate,
+            enddate__gte=startdate
+        ).exclude(
+            status__in=['rejected', 'cancelled']
+        ).exists()
+
+        if conflict:
+            return Response(
+                {'error': 'You already have a reservation for this car during these dates.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # create reservation
+        reservation = serializer.save(
+            user=request.user,
+            status='pending'
+        )
+
+        return Response(
+            {
+                'message': 'Reservation created successfully',
+                'reservation_id': reservation.reservationid,
+                'status': reservation.status
+            },
+            status=status.HTTP_201_CREATED
+        )
+
+
+# to get reserved dates of a car
+class CarReservedDatesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, car_id):
+        reservations = Reservation.objects.filter(
+            car_id=car_id,
+            status__in=['pending', 'approved']
+        ).values('startdate', 'enddate')
+
+        return Response(reservations, status=status.HTTP_200_OK)
