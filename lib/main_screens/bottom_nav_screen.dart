@@ -30,7 +30,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
 
     _pages = [
       Builder(builder: (_) => BrowseScreen(isGuest: widget.isGuest)), // first tab: browse cars
-      Builder(builder: (_) => AdminCarsPage()), // second tab: search
+      Builder(builder: (_) => AdminReservationsPage()), // second tab: search
       Builder(builder: (_) => MyRentalsScreen()), // third tab: my rentals
       Builder(builder: (_) => WishlistScreen()), // fourth tab: wishlist
       Builder(builder: (_) => ProfileScreen()), // fifth tab: profile
