@@ -48,7 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final token = data['access']; // or whatever your login API returns
+        final token = data['access'];
 
         // Save token securely
         await storage.write(key: 'access', value: token);

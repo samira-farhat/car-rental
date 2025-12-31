@@ -1,7 +1,7 @@
+import 'package:car_management_frontend/screens/customer_screens/reserve_screen.dart';
 import 'package:flutter/material.dart';
 import '../../models/car_model.dart';
 import '../../globals.dart';
-import 'reserve_screen.dart';
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
@@ -126,7 +126,7 @@ class _CarDetailsScreenState extends State<CarDetailsScreen> {
                               context,
                               MaterialPageRoute(
                                 builder: (_) =>
-                                    ReserveScreen(carId: widget.car.carId),
+                                    ReserveScreen(car: widget.car),
                               ),
                             );
                           },

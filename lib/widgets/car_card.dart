@@ -186,7 +186,7 @@ class _CarCardState extends State<CarCard> {
                             context,
                             MaterialPageRoute(
                               builder: (_) =>
-                                  ReserveScreen(carId: widget.car.carId),
+                                  ReserveScreen(car: widget.car),
                             ),
                           );
                         }
