@@ -136,3 +136,26 @@ class UserLicenseSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(obj.document_image.url)
             return obj.document_image.url
         return None
+
+# Serializer used by customers to create a reservation.
+class CreateReservationSerializer(serializers.ModelSerializer):
+   
+
+    class Meta:
+        model = Reservation
+        fields = [
+            'car',
+            'startdate',
+            'enddate',
+        ]
+
+    def validate(self, data):
+        start = data['startdate']
+        end = data['enddate']
+
+        if start >= end:
+            raise serializers.ValidationError(
+                "End date must be after start date."
+            )
+
+        return data
