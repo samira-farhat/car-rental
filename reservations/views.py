@@ -42,7 +42,11 @@ class AdminReservationListView(APIView):
             reservations = reservations.filter(status=status_filter)
 
         # Convert queryset to JSON
-        serializer = AdminReservationListSerializer(reservations, many=True)
+        serializer = AdminReservationListSerializer(
+            reservations,
+            many=True,
+            context={'request': request}
+            )
         return Response(serializer.data)
 
 class AdminReservationDetailView(APIView):
@@ -63,8 +67,13 @@ class AdminReservationDetailView(APIView):
                 {'error': 'Reservation not found'},
                 status=status.HTTP_404_NOT_FOUND
             )
+            
 
-        serializer = AdminReservationDetailSerializer(reservation)
+        serializer = AdminReservationDetailSerializer(
+            reservation,
+            context={'request': request}
+        )
+
         return Response(serializer.data)
 
 class ApproveReservationView(APIView):

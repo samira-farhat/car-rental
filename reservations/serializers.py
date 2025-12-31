@@ -3,16 +3,12 @@
 from rest_framework import serializers
 from .models import Reservation
 from cars.models import Car
+from accounts.models import Documentation
 
 
 class AdminCarSerializer(serializers.ModelSerializer):
-    """
-    Lightweight serializer for Car data used inside reservation responses.
-    This avoids sending unnecessary fields to the admin UI.
-    """
-
-    # Combine brand + model + year into a single readable string
     car_name = serializers.SerializerMethodField()
+    image_url = serializers.SerializerMethodField()  # new field
 
     class Meta:
         model = Car
@@ -20,14 +16,21 @@ class AdminCarSerializer(serializers.ModelSerializer):
             'carid',
             'vin',
             'car_name',
-            'image',
+            'image_url',  # use this instead of 'image'
             'rentalpriceperday',
             'availabilitystatus'
         ]
 
     def get_car_name(self, obj):
-        # Returns: "Toyota Yaris 2021"
         return f"{obj.brand} {obj.model} {obj.year}"
+
+    def get_image_url(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url  # fallback to relative path
+        return None
 
 
 class AdminReservationListSerializer(serializers.ModelSerializer):
@@ -37,7 +40,7 @@ class AdminReservationListSerializer(serializers.ModelSerializer):
 
     user_name = serializers.SerializerMethodField()
     car = AdminCarSerializer(read_only=True)
-
+    
     class Meta:
         model = Reservation
         fields = [
@@ -77,6 +80,7 @@ class AdminReservationDetailSerializer(serializers.ModelSerializer):
         source='user.email',
         read_only=True
     )
+    license = serializers.SerializerMethodField()
     car = AdminCarSerializer(read_only=True)
     
     duration = serializers.SerializerMethodField()
@@ -102,6 +106,33 @@ class AdminReservationDetailSerializer(serializers.ModelSerializer):
         duration = (obj.enddate - obj.startdate).days + 1
         return duration * obj.car.rentalpriceperday
     
+    def get_license(self, obj):
+        license_doc = obj.user.documents.filter(
+            document_type__iexact='driver license'
+        ).first()
+
+        if not license_doc:
+            return None
+
+        return UserLicenseSerializer(
+            license_doc,
+            context=self.context
+        ).data
     class Meta:
         model = Reservation
         fields = '__all__'
+        
+class UserLicenseSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Documentation
+        fields = ['document_type', 'status', 'image_url']
+
+    def get_image_url(self, obj):
+        request = self.context.get('request')
+        if obj.document_image:
+            if request:
+                return request.build_absolute_uri(obj.document_image.url)
+            return obj.document_image.url
+        return None
