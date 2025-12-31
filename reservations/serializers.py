@@ -4,7 +4,8 @@ from rest_framework import serializers
 from .models import Reservation
 from cars.models import Car
 from accounts.models import Documentation
-
+import os
+from django.conf import settings
 
 class AdminCarSerializer(serializers.ModelSerializer):
     car_name = serializers.SerializerMethodField()
@@ -157,12 +158,16 @@ class UserLicenseSerializer(serializers.ModelSerializer):
         fields = ['document_type', 'status', 'image_url']
 
     def get_image_url(self, obj):
-        request = self.context.get('request')
         if obj.document_image:
-            if request:
-                return request.build_absolute_uri(obj.document_image.url)
-            return obj.document_image.url
+            # check if file actually exists in media folder
+            full_path = os.path.join(settings.MEDIA_ROOT, obj.document_image.name)
+            if os.path.exists(full_path):
+                request = self.context.get('request')
+                if request:
+                    return request.build_absolute_uri(obj.document_image.url)
+                return obj.document_image.url
         return None
+
 
 # Serializer used by customers to create a reservation.
 class CreateReservationSerializer(serializers.ModelSerializer):
