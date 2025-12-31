@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../globals.dart';
 
+
 class AdminReservationDetailsPage extends StatefulWidget {
   final int reservationId;
 
@@ -19,7 +20,6 @@ class AdminReservationDetailsPage extends StatefulWidget {
 
 class _AdminReservationDetailsPageState
     extends State<AdminReservationDetailsPage> with SingleTickerProviderStateMixin {
-  // --- BACKEND LOGIC (UNTOUCHED) ---
   final storage = const FlutterSecureStorage();
   bool isLoading = true;
   Map<String, dynamic>? reservation;
@@ -80,8 +80,6 @@ class _AdminReservationDetailsPageState
   Future<void> approveReservation() => adminAction('approve');
   Future<void> rejectReservation() => adminAction('reject');
 
-  // --- FUTURISTIC UI WITH ALL ORIGINAL DETAILS ---
-
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -112,46 +110,35 @@ class _AdminReservationDetailsPageState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. Car Image & Status
             _animate(index: 0, child: _buildHeroSection(r)),
-
             const SizedBox(height: 25),
-
-            // 2. Car Technical Details (VIN, Price, Availability)
             _animate(index: 1, child: _buildSectionTitle('Vehicle Specifications')),
             _animate(index: 2, child: _buildCarSpecsGrid(r['car'])),
-
             const SizedBox(height: 25),
-
-            // 3. User Information (Name, Phone, Email)
             _animate(index: 3, child: _buildSectionTitle('Customer Information')),
             _animate(index: 4, child: _buildUserCard(r)),
-
+            if (r['license'] != null) ...[
+              _animate(index: 5, child: _buildSectionTitle('Driver License')),
+              _animate(index: 6, child: _buildLicenseCard(r['license'])),
+            ],
             const SizedBox(height: 25),
-
-            // 4. Reservation Details (Dates, Duration, Total)
-            _animate(index: 5, child: _buildSectionTitle('Booking Summary')),
-            _animate(index: 6, child: _buildBookingCard(r)),
-
+            _animate(index: 7, child: _buildSectionTitle('Booking Summary')),
+            _animate(index: 8, child: _buildBookingCard(r)),
             const SizedBox(height: 20),
-
-            // 5. Created Timestamp
-            _animate(index: 7, child: Center(
+            _animate(index: 9, child: Center(
                 child: Text('Booked on: ${r['createdat']}',
                     style: TextStyle(color: Colors.grey.shade500, fontSize: 12)))),
-
             const SizedBox(height: 30),
-
-            // 6. Action Buttons
             if (r['status'] == 'pending')
-              _animate(index: 8, child: _buildActionButtons()),
-
+              _animate(index: 10, child: _buildActionButtons()),
             const SizedBox(height: 50),
           ],
         ),
       ),
     );
   }
+
+  // --- WIDGET BUILDERS ---
 
   Widget _buildHeroSection(Map<String, dynamic> r) {
     return Column(
@@ -162,7 +149,7 @@ class _AdminReservationDetailsPageState
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
             image: DecorationImage(
-              image: NetworkImage('http://localhost:8000/media/${r['car']['image']}'),
+              image: NetworkImage('${r['car']['image_url']}'),
               fit: BoxFit.cover,
             ),
           ),
@@ -192,7 +179,7 @@ class _AdminReservationDetailsPageState
         _specTile('VIN', car['vin'].toString(), Icons.fingerprint),
         _specTile('Rate', '\$${car['rentalpriceperday']}/day', Icons.sell_outlined),
         _specTile('Status', car['availabilitystatus'], Icons.info_outline),
-        _specTile('Type', 'Premium', Icons.star_border), // Example extra detail
+        _specTile('Type', 'Premium', Icons.star_border),
       ],
     );
   }
@@ -274,8 +261,45 @@ class _AdminReservationDetailsPageState
     );
   }
 
-  // --- HELPER UI UNITS ---
+  Widget _buildLicenseCard(Map<String, dynamic> license) {
+    final String url = license['image_url'];
 
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.badge_outlined, color: Color(0xFF49C5E0)),
+              const SizedBox(width: 10),
+              Text(
+                'STATUS: ${license['status'].toUpperCase()}',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(14),
+            child: Image.network(
+              url,
+              height: 180,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- HELPER UI ---
   Widget _animate({required int index, required Widget child}) {
     return FadeTransition(
       opacity: CurvedAnimation(parent: _animController, curve: Interval(index * 0.05, 0.6, curve: Curves.easeIn)),
