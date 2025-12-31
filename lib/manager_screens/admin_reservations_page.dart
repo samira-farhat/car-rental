@@ -159,7 +159,7 @@ class _AdminReservationsPageState extends State<AdminReservationsPage>
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(18),
-                child: Image.network('http://localhost:8000/media/${r.carImage}', width: 90, height: 90, fit: BoxFit.cover),
+                child: Image.network('http://localhost:8000/${r.carImage}', width: 90, height: 90, fit: BoxFit.contain),
               ),
               const SizedBox(width: 16),
               Expanded(
