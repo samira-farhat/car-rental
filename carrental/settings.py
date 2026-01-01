@@ -43,9 +43,11 @@ INSTALLED_APPS = [
     'cars',
     'wishlist',
     'reviews',
+    'damages',
     'rest_framework_simplejwt',
     'reservations',
     'rentals',
+    'reports',
     
 ]
 
@@ -96,7 +98,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql', # to use MySQL
         'NAME': 'CarRentalDB', # our database name
         'USER': 'root', # MySQL username
-        'PASSWORD': 'Root', # MySQL password
+        'PASSWORD': 'root', # MySQL password
         'HOST': 'localhost', # host
         'PORT': '3306', # default MySQL port
     }
