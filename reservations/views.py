@@ -20,6 +20,10 @@ from .serializers import (
 from rest_framework.permissions import IsAuthenticated
 from .serializers import CreateReservationSerializer
 
+from rest_framework.permissions import IsAuthenticated
+from rentals.models import Rental
+from .serializers import CustomerReservationListSerializer
+
 
 class AdminReservationListView(APIView):
     """
@@ -297,3 +301,123 @@ class CarReservedDatesView(APIView):
         ).values('startdate', 'enddate')
 
         return Response(reservations, status=status.HTTP_200_OK)
+
+
+
+# CUSTOMER: Rentals Logic
+
+# customer tabs: pending / approved  / rejected / cancelled / history (completed)
+class MyReservationsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        status_filter = request.GET.get('status')
+
+        reservations = (
+            Reservation.objects
+            .filter(user=request.user)
+            .select_related('car', 'car__categoryid')
+            .order_by('-createdat')
+        )
+
+        if status_filter == 'history':
+            reservations = reservations.filter(status='completed')
+        elif status_filter:
+            reservations = reservations.filter(status=status_filter)
+
+        serializer = CustomerReservationListSerializer(
+            reservations,
+            many=True,
+            context={'request': request}
+        )
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+# CANCELLATION LOGIC
+
+# customer can cancel pending/ approved reservation (which also cancels in rentals table)
+class CancelReservationView(APIView):
+   
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            reservation = Reservation.objects.select_related('car').get(
+                reservationid=pk,
+                user=request.user
+            )
+        except Reservation.DoesNotExist:
+            return Response(
+                {'error': 'Reservation not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if reservation.status not in ['pending', 'approved']:
+            return Response(
+                {'error': 'Cannot cancel this reservation'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Cancel reservation
+        reservation.status = 'cancelled'
+        reservation.save()
+
+        # Cancel rental if exists
+        rental = Rental.objects.filter(reservation=reservation).first()
+        if rental:
+            rental.status = 'cancelled'
+            rental.save()
+
+        # Free car
+        car = reservation.car
+        car.availabilitystatus = 'available'
+        car.save()
+
+        return Response(
+            {'message': 'Reservation cancelled successfully'},
+            status=status.HTTP_200_OK
+        )
+
+
+
+# CUSTOMER: to get customer reservation details 
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import Reservation
+from .serializers import CustomerReservationDetailSerializer
+
+# Returns full reservation details for a customer.
+# Including car info, rental info (duration, total, rental_status), and booking summary.
+class CustomerReservationDetailView(APIView):
+    
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        try:
+            # select_related to avoid extra queries on car and category
+            reservation = Reservation.objects.select_related(
+                'car', 'car__categoryid'
+            ).get(
+                reservationid=pk,
+                user=request.user
+            )
+        except Reservation.DoesNotExist:
+            return Response(
+                {'error': 'Reservation not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # attach the rental object if it exists
+        rental = getattr(reservation, 'rental', None)  # OneToOneField gives 'rental'
+        setattr(reservation, 'rental', rental)  # optional, serializer can use reservation.rental
+
+        serializer = CustomerReservationDetailSerializer(
+            reservation,
+            context={'request': request}
+        )
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
