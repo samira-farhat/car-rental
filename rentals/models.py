@@ -17,5 +17,4 @@ class Rental(models.Model):
     createdat = models.DateTimeField(auto_now_add=True, db_column='CreatedAt')
 
     class Meta:
-        managed = False  # existing table
         db_table = 'Rental'

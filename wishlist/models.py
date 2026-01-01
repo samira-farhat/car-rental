@@ -3,13 +3,15 @@ from accounts.models import User
 from cars.models import Car
 
 class Wishlist(models.Model):
-    wishlistid = models.AutoField(primary_key=True)  # matches WishlistID
+    class Wishlist(models.Model):
+     WishlistID = models.AutoField(primary_key=True, db_column='WishlistID')
+
     user = models.ForeignKey(User, on_delete=models.CASCADE, db_column='UserID', related_name='wishlist_items')
     car = models.ForeignKey(Car, on_delete=models.CASCADE, db_column='CarID', related_name='wishlisted_by')
     date_added = models.DateTimeField(auto_now_add=True, db_column='DateAdded')
 
     class Meta:
-        db_table = 'wishlist'  # matches your existing table name
+        db_table = 'Wishlist'  # matches your existing table name
         unique_together = ('user', 'car')
         ordering = ['-date_added']
 
