@@ -104,11 +104,11 @@ class _CarCardState extends State<CarCard> {
                       SizedBox(height: 6),
 
                       Text(
-                        widget.car.availabilityStatus,
+                        widget.car.availabilityStatus.toUpperCase(),
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: widget.car.availabilityStatus.toLowerCase() == "available"
+                          color: widget.car.availabilityStatus.toUpperCase() == "AVAILABLE"
                               ? Colors.green
                               : Colors.red,
                         ),
@@ -192,9 +192,13 @@ class _CarCardState extends State<CarCard> {
                         }
                       },
                       style: TextButton.styleFrom(
-                        foregroundColor: Colors.green,
+                        foregroundColor: midnightBlue,
                       ),
-                      child: Text('Reserve'),
+                      child: Text('Reserve',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ],
                 ),

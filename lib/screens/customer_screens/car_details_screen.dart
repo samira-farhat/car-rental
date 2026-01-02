@@ -91,11 +91,11 @@ class _CarDetailsScreenState extends State<CarDetailsScreen> {
 
                   // cars availability status
                   Text(
-                    widget.car.availabilityStatus,
+                    widget.car.availabilityStatus.toUpperCase(),
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      color: widget.car.availabilityStatus.toLowerCase() == "available"
+                      color: widget.car.availabilityStatus.toUpperCase() == "AVAILABLE"
                           ? Colors.green
                           : Colors.red,
                     ),

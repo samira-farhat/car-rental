@@ -28,7 +28,7 @@ class Reservation {
       reservationid: json['reservationid'] ?? 0,
       userName: json['user_name'] ?? 'unknown user',
       carName: json['car']['car_name'] ?? '',
-      carImage: json['car']['image'] ?? '',
+      carImage: json['car']['image_url'] ?? '',
       pricePerDay: double.parse(json['car']['rentalpriceperday']) ?? 0,
       status: json['status'] ?? '',
       startDate: DateTime.parse(json['startdate']),
