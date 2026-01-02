@@ -7,6 +7,7 @@ import '../manager_screens/reports.dart';
 import '../manager_screens/car_manage_page.dart';
 import '../screens/customer_screens/browse_screen.dart';
 import '../screens/features/reviews_screen.dart';
+import 'package:car_management_frontend/screens/customer_screens/my_rentals_screen.dart';
 
 class BottomNavScreen extends StatefulWidget {
   final bool isGuest; // true if browsing as guest
