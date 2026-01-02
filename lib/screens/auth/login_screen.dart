@@ -30,8 +30,8 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       return;
     }
-    // //Samira
-    // final url = Uri.parse('http://192.168.0.110:8000/api/accounts/login/');
+    //Samira
+    // final url = Uri.parse('http://localhost:8000/api/accounts/login/');
     final url = Uri.parse(
       //Mohammad
         'http://localhost:8000/api/accounts/login/'
@@ -48,7 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final token = data['access']; // or whatever your login API returns
+        final token = data['access'];
 
         // Save token securely
         await storage.write(key: 'access', value: token);

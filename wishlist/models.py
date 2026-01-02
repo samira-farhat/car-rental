@@ -3,8 +3,12 @@ from accounts.models import User
 from cars.models import Car
 
 class Wishlist(models.Model):
+
     class Wishlist(models.Model):
      WishlistID = models.AutoField(primary_key=True, db_column='WishlistID')
+
+
+    wishlistid = models.AutoField(db_column='WishlistID', primary_key=True)  # matches WishlistID
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, db_column='UserID', related_name='wishlist_items')
     car = models.ForeignKey(Car, on_delete=models.CASCADE, db_column='CarID', related_name='wishlisted_by')

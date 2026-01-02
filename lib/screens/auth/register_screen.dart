@@ -21,7 +21,7 @@ Future<Map<String, dynamic>> registerUser({
   String? documentExtension,
 }) async {
   //Samira
-  final uri= Uri.parse('http://192.168.0.110:8000/api/accounts/register/');
+  final uri= Uri.parse('http://localhost:8000/api/accounts/register/');
   // final uri = Uri.parse(
   //   //Mohammad
   //   'http://192.168.10.20:8000/api/accounts/register/',
@@ -371,54 +371,81 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Widget uploadLicenseButton() {
+    final bool hasFile = documentFile != null || documentBytes != null;
+
     return GestureDetector(
       onTap: () async {
-        // on mobile:
+        // Mobile permission
         if (!kIsWeb) {
           PermissionStatus status = await Permission.storage.request();
           if (!status.isGranted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                  content: Text(
-                      'Storage permission is required to upload the license')),
+              const SnackBar(
+                content: Text('Storage permission is required'),
+              ),
             );
             return;
           }
         }
 
-        // pick file
+        // Pick file
         FilePickerResult? result = await FilePicker.platform.pickFiles(
           type: FileType.custom,
           allowedExtensions: ['pdf', 'jpg', 'png', 'jpeg'],
-          withData: kIsWeb, // to import from web
+          withData: kIsWeb,
         );
 
         if (result != null) {
           setState(() {
             if (kIsWeb) {
-              documentBytes = result.files.single.bytes; // for web
-              documentExtension =
-                  result.files.single.extension; // save extension
+              documentBytes = result.files.single.bytes;
+              documentExtension = result.files.single.extension;
             } else {
-              documentFile =
-                  File(result.files.single.path!); // for mobile
+              documentFile = File(result.files.single.path!);
             }
           });
         }
       },
-      child: Text(
-        (documentFile != null || documentBytes != null)
-            ? 'License Selected'
-            : 'Upload License *',
-        style: TextStyle(
-          color: Colors.redAccent,
-          decoration: TextDecoration.underline,
-          fontWeight: FontWeight.bold,
-          fontSize: 15,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: hasFile ? Colors.greenAccent : Colors.redAccent,
+            width: 1.4,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              hasFile ? Icons.check_circle : Icons.upload_file,
+              color: hasFile ? Colors.greenAccent : Colors.white,
+              size: 26,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                hasFile
+                    ? 'License Selected'
+                    : 'Upload Driver License *',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                ),
+              ),
+            ),
+            const Icon(
+              Icons.chevron_right,
+              color: Colors.white54,
+            ),
+          ],
         ),
       ),
     );
   }
+
 
   Widget buildRequiredField(
       TextEditingController controller, String label, String error) {

@@ -18,8 +18,22 @@ class Car(models.Model):
     year = models.IntegerField(db_column='Year')
     description = models.TextField(blank=True, null=True) 
     rentalpriceperday = models.DecimalField(db_column='RentalPricePerDay', max_digits=10, decimal_places=2)
-    availabilitystatus = models.CharField(db_column='AvailabilityStatus', max_length=11, blank=True, null=True)
-    image = models.CharField(db_column='Image', max_length=255, blank=True, null=True)
+    availabilitystatus = models.CharField(
+        db_column='AvailabilityStatus',
+        max_length=11,
+        choices=[
+            ('available', 'Available'),
+            ('rented', 'Rented'),
+            ('maintenance', 'Maintenance')
+        ],
+        blank=True,
+        null=True
+    )
+    image = models.ImageField(
+        upload_to='cars/',      # saves images to media/cars/
+        blank=True,
+        null=True
+    )
     createdat = models.DateTimeField(db_column='CreatedAt', blank=True, null=True)
 
     class Meta:
