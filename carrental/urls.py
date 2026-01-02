@@ -35,6 +35,7 @@ urlpatterns = [
     path('api/rentals/', include('rentals.urls')),
     path('api/reviews/', include('reviews.urls')),
     path('api/', include('reservations.urls')),
+    path('api/', include('dashboard.urls')),
 
 ]
 

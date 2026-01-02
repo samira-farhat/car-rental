@@ -17,7 +17,7 @@ class SubmitReviewView(APIView):
         return Response(serializer.errors, status=400)
 
 
-
+# GET view
 class CarReviewsView(APIView):
     permission_classes = [permissions.AllowAny]
 

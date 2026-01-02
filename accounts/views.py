@@ -42,7 +42,8 @@ class LoginUserView(APIView):
                 return Response({
                     "refresh": str(refresh),
                     "access": str(refresh.access_token),
-                    "role": user.role,
+                    "role": "admin" if user.is_staff else "customer",
+                    "is_staff": user.is_staff,
                     "message": "Login successful"
                 }, status=status.HTTP_200_OK)
                 
