@@ -9,7 +9,7 @@ class Wishlist(models.Model):
     date_added = models.DateTimeField(auto_now_add=True, db_column='DateAdded')
 
     class Meta:
-        db_table = 'wishlist'  # matches your existing table name
+        db_table = 'Wishlist'  # matches your existing table name
         unique_together = ('user', 'car')
         ordering = ['-date_added']
 

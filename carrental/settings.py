@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'reservations',
     'rentals',
+    'payments',
     'reports',
     
 ]
@@ -103,6 +104,7 @@ DATABASES = {
         'PORT': '3306', # default MySQL port
     }
 }
+
 
 # in rder to use the custom user model for authentication
 AUTH_USER_MODEL = 'accounts.User'
