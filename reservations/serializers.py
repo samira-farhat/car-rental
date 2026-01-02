@@ -4,7 +4,8 @@ from rest_framework import serializers
 from .models import Reservation
 from cars.models import Car
 from accounts.models import Documentation
-
+import os
+from django.conf import settings
 
 class AdminCarSerializer(serializers.ModelSerializer):
     car_name = serializers.SerializerMethodField()
@@ -124,31 +125,6 @@ class AdminReservationDetailSerializer(serializers.ModelSerializer):
 
 
 
-
-# Serializer used by customers to create a reservation.
-class CreateReservationSerializer(serializers.ModelSerializer):
-   
-
-    class Meta:
-        model = Reservation
-        fields = [
-            'car',
-            'startdate',
-            'enddate',
-        ]
-
-    def validate(self, data):
-        start = data['startdate']
-        end = data['enddate']
-
-        if start >= end:
-            raise serializers.ValidationError(
-                "End date must be after start date."
-            )
-
-        return data
-
-        
 class UserLicenseSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()
 
@@ -157,12 +133,16 @@ class UserLicenseSerializer(serializers.ModelSerializer):
         fields = ['document_type', 'status', 'image_url']
 
     def get_image_url(self, obj):
-        request = self.context.get('request')
         if obj.document_image:
-            if request:
-                return request.build_absolute_uri(obj.document_image.url)
-            return obj.document_image.url
+            # check if file actually exists in media folder
+            full_path = os.path.join(settings.MEDIA_ROOT, obj.document_image.name)
+            if os.path.exists(full_path):
+                request = self.context.get('request')
+                if request:
+                    return request.build_absolute_uri(obj.document_image.url)
+                return obj.document_image.url
         return None
+
 
 # Serializer used by customers to create a reservation.
 class CreateReservationSerializer(serializers.ModelSerializer):
@@ -186,3 +166,102 @@ class CreateReservationSerializer(serializers.ModelSerializer):
             )
 
         return data
+    
+
+
+# CUSTOMER SERIALIZER
+# used to get reservations of customers according to status: pending, approved, rejected, cancelled, completed..
+class CustomerReservationListSerializer(serializers.ModelSerializer):
+    car_name = serializers.SerializerMethodField()
+    car_image = serializers.SerializerMethodField()
+    category = serializers.CharField(
+        source='car.categoryid.categoryname',
+        read_only=True
+    )
+
+    class Meta:
+        model = Reservation
+        fields = [
+            'reservationid',
+            'status',
+            'startdate',
+            'enddate',
+            'rejectionreason',
+            'car_name',
+            'car_image',
+            'category',
+            'createdat'
+        ]
+
+    def get_car_name(self, obj):
+        return f"{obj.car.brand} {obj.car.model} {obj.car.year}"
+
+    def get_car_image(self, obj):
+        if obj.car.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.car.image.url)
+            return obj.car.image.url
+        return None
+
+
+
+# CUSTOMER RESERVATION DETAIL
+class CustomerReservationDetailSerializer(serializers.ModelSerializer):
+    # Car info
+    car_name = serializers.SerializerMethodField()
+    car_image = serializers.SerializerMethodField()
+    category = serializers.CharField(source='car.categoryid.categoryname', read_only=True)
+    year = serializers.IntegerField(source='car.year', read_only=True)
+    
+    # Rental info
+    rental_status = serializers.SerializerMethodField()
+    duration = serializers.SerializerMethodField()
+    total_amount = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Reservation
+        fields = [
+            'reservationid',
+            'status',  # reservation status: pending, approved, cancelled, completed
+            'startdate',
+            'enddate',
+            'rejectionreason',
+            'car_name',
+            'car_image',
+            'category',
+            'year',
+            'rental_status',  # from rental table: pending_payment, active, completed, cancelled
+            'duration',
+            'total_amount',
+            'createdat'
+        ]
+    
+    def get_car_name(self, obj):
+        return f"{obj.car.brand} {obj.car.model} {obj.car.year}"
+    
+    def get_car_image(self, obj):
+        if obj.car.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.car.image.url)
+            return obj.car.image.url
+        return None
+    
+    def get_rental_status(self, obj):
+        rental = getattr(obj, 'rental', None)
+        if rental:
+            return rental.status
+        return 'pending_payment'  # fallback if no rental yet
+    
+    def get_duration(self, obj):
+        rental = getattr(obj, 'rental', None)
+        if rental:
+            return rental.duration
+        return (obj.enddate - obj.startdate).days + 1  # fallback
+    
+    def get_total_amount(self, obj):
+        rental = getattr(obj, 'rental', None)
+        if rental:
+            return rental.totalamount
+        return obj.car.rentalpriceperday * ((obj.enddate - obj.startdate).days + 1)  # fallback
