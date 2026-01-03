@@ -224,6 +224,7 @@ class _SearchScreenState extends State<SearchScreen> {
               ],
             ),
 
+
             SizedBox(height: 12),
 
             // Filtered car list

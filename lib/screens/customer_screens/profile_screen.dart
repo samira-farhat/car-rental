@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'upload_documents_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   @override
@@ -12,10 +13,18 @@ class ProfileScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              'Welcome to the Profile Screen!',
-              style: TextStyle(fontSize: 20),
-            ),
+            ElevatedButton(
+            onPressed: () {
+      Navigator.push(
+      context,
+      MaterialPageRoute(
+      builder: (_) => const UploadDocumentsScreen(),
+      ),
+      );
+      },
+        child: const Text('Upload Documents'),
+      )
+
           ],
         ),
       ),
