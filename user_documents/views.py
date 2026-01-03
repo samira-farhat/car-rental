@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from .models import Documentation
+from accounts.models import Documentation
 
 
 class MyDocumentsView(APIView):
@@ -11,18 +11,16 @@ class MyDocumentsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        user_id = request.user.id
-
-        documents = Documentation.objects.filter(userid=user_id)
+        documents = Documentation.objects.filter(user=request.user)
 
         data = []
         for doc in documents:
             data.append({
                 "id": doc.documentid,
-                "title": doc.documenttype,
+                "type": doc.document_type,
                 "status": doc.status,
-                "image": doc.documentimage,
-                "uploaded_at": doc.uploadedat,
+                "file": doc.document_image.url if doc.document_image else None,
+                "uploaded_at": doc.uploaded_at,
             })
 
         return Response(data)

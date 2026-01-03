@@ -5,6 +5,8 @@ import '../../screens/auth/register_screen.dart';
 import '../../globals.dart'; // import globals
 import 'bottom_nav_screen.dart';
 
+
+
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -130,6 +132,8 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                   ),
+
+
 
                   SizedBox(height: 40),
 

@@ -13,6 +13,12 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+
+
 
 # user registration API
 @api_view(['POST'])
@@ -64,3 +70,35 @@ def forgot_password(request):
         except User.DoesNotExist:
             return Response({"error": "Email not found"}, status=status.HTTP_404_NOT_FOUND)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET', 'PUT'])
+@permission_classes([IsAuthenticated])
+def user_profile(request):
+    user = request.user
+
+    if request.method == 'GET':
+        return Response({
+            'first_name': user.first_name,
+            'middle_name': user.middle_name,
+            'last_name': user.last_name,
+            'email': user.email,
+            'phone': user.phone,
+            'address': user.address,
+        })
+
+    elif request.method == 'PUT':
+        data = request.data
+
+        user.first_name = data.get('first_name', user.first_name)
+        user.middle_name = data.get('middle_name', user.middle_name)
+        user.last_name = data.get('last_name', user.last_name)
+        user.phone = data.get('phone', user.phone)
+        user.address = data.get('address', user.address)
+
+        user.save()
+
+        return Response(
+            {'message': 'Profile updated successfully'},
+            status=status.HTTP_200_OK
+        )

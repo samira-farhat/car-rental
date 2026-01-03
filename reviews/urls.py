@@ -1,8 +1,8 @@
-# reviews/urls.py
 from django.urls import path
-from .views import SubmitReviewView, CarReviewsView
+from .views import SubmitReviewView, CarReviewsView, MyReviewsView
 
 urlpatterns = [
     path('submit/', SubmitReviewView.as_view(), name='submit-review'),
     path('car/<int:car_id>/', CarReviewsView.as_view(), name='car-reviews'),
+    path('my/', MyReviewsView.as_view(), name='my-reviews'),
 ]

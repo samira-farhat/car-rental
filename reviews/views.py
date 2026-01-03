@@ -4,6 +4,10 @@ from rest_framework.response import Response
 from rest_framework import status, permissions
 from .serializers import ReviewSerializer, CarReviewListSerializer
 from .models import Review
+from rest_framework.permissions import IsAuthenticated
+from django.db.models import F
+
+
 
 class SubmitReviewView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -25,3 +29,27 @@ class CarReviewsView(APIView):
         reviews = Review.objects.filter(car_id=car_id).order_by('-reviewdate')
         serializer = CarReviewListSerializer(reviews, many=True)
         return Response(serializer.data, status=200)
+    
+class MyReviewsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        reviews = (
+            Review.objects
+            .filter(user=request.user)
+            .select_related('car')
+            .order_by('-reviewdate')
+        )
+
+        data = []
+        for r in reviews:
+            data.append({
+                "id": r.reviewid,
+                "rating": r.rating,
+                "comment": r.description,
+                "car": f"{r.car.brand} {r.car.model}",
+                "date": r.reviewdate,
+            })
+
+        return Response(data, status=200)
+
