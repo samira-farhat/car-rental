@@ -39,6 +39,7 @@ urlpatterns = [
 
 
     path('api/', include('reservations.urls')),
+    path('api/', include('dashboard.urls')),
 
 ]
 

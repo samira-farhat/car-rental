@@ -84,6 +84,7 @@ flutter:
     - assets/images/reservation.jpeg
     - assets/images/top_login.jpeg
     - assets/images/bottom_login.jpeg
+    - assets/images/dashboard.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
