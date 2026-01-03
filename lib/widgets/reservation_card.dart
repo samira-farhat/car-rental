@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../screens/customer_screens/reservation_details_screen.dart';
+import 'package:car_management_frontend/screens/customer_screens/make_payment_screen.dart';
 
 class ReservationCard extends StatelessWidget {
   final Map reservation;
@@ -187,8 +188,18 @@ class ReservationCard extends StatelessWidget {
                         ),
                       ),
                       onPressed: () {
-                        Navigator.pushNamed(context, '/payment');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => MakePaymentScreen(
+                              bookingId: reservation['reservationid'],
+
+                            ),
+                          ),
+                        ).then((_) => onRefresh());
+
                       },
+
                       child: Text('Rent Now'),
                     ),
                   ),

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class MakePaymentScreen extends StatefulWidget {
-  final int bookingId; // rental/reservation id
-  final double totalAmount; // final total
+  final int bookingId; // reservation id
 
   const MakePaymentScreen({
     Key? key,
     required this.bookingId,
-    required this.totalAmount,
   }) : super(key: key);
 
   @override
@@ -26,7 +27,12 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
 
   bool _isProcessing = false;
   bool _paymentSuccess = false;
-  String? _receiptId; // dummy for frontend
+
+  // backend values
+  String? _receiptId; // payment_id from backend
+  double? _backendTotal; // total_amount from backend
+  String? _backendPaymentStatus; // pending/completed
+  int? _backendRentalId; // rental_id from backend (if you want)
 
   @override
   void dispose() {
@@ -42,7 +48,7 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
   }
 
   Future<void> _confirmPayment() async {
-    // For cash: no card validation needed.
+    // Validate card only if card selected
     if (_method == PaymentMethod.card) {
       if (!_formKey.currentState!.validate()) return;
     }
@@ -50,28 +56,64 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
     setState(() {
       _isProcessing = true;
       _paymentSuccess = false;
-      _receiptId = null;
     });
 
-    // fake processing time
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      const storage = FlutterSecureStorage();
+      final token = await storage.read(key: 'access');
 
-    setState(() {
-      _isProcessing = false;
-      _paymentSuccess = true;
-      _receiptId = "RCPT-${DateTime.now().millisecondsSinceEpoch}";
-    });
+      final response = await http.post(
+        Uri.parse('http://localhost:8000/api/payments/make-payment/'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          // ✅ Option A: backend calculates amount, so DON'T send amount
+          "reservation": widget.bookingId,
+          "method": _method == PaymentMethod.card ? "card" : "cash",
+        }),
+      );
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          _method == PaymentMethod.cash
-              ? "Payment saved as Pending Verification (cash)."
-              : "Payment Successful.",
-        ),
-        backgroundColor: Colors.green,
-      ),
-    );
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        setState(() {
+          _paymentSuccess = true;
+          _receiptId = data['payment_id']?.toString();
+          _backendRentalId = data['rental_id'] is int
+              ? data['rental_id']
+              : int.tryParse(data['rental_id']?.toString() ?? '');
+          _backendTotal =
+              double.tryParse(data['total_amount']?.toString() ?? '0') ?? 0.0;
+          _backendPaymentStatus = data['payment_status']?.toString();
+        });
+
+        final msg = (_backendPaymentStatus == 'pending')
+            ? "Cash payment saved as Pending Verification."
+            : "Payment completed successfully.";
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(msg), backgroundColor: Colors.green),
+        );
+      } else {
+        // try parse backend error
+        String message = "Payment failed.";
+        try {
+          final err = jsonDecode(response.body);
+          message = err['error']?.toString() ?? message;
+        } catch (_) {}
+        throw message;
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+      );
+    } finally {
+      setState(() {
+        _isProcessing = false;
+      });
+    }
   }
 
   void _cancel() {
@@ -79,8 +121,6 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
   }
 
   void _viewReceipt() {
-    if (_receiptId == null) return;
-
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -89,18 +129,22 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Receipt ID: $_receiptId"),
+            Text("Receipt ID: ${_receiptId ?? '-'}"),
             const SizedBox(height: 8),
-            Text("Booking ID: ${widget.bookingId}"),
+            Text("Reservation ID: ${widget.bookingId}"),
             const SizedBox(height: 8),
-            Text("Amount: \$${widget.totalAmount.toStringAsFixed(2)}"),
+            if (_backendRentalId != null) Text("Rental ID: $_backendRentalId"),
+            if (_backendRentalId != null) const SizedBox(height: 8),
+            Text("Amount: \$${(_backendTotal ?? 0).toStringAsFixed(2)}"),
             const SizedBox(height: 8),
             Text("Method: ${_method == PaymentMethod.card ? "Card" : "Cash"}"),
+            const SizedBox(height: 8),
+            Text("Status: ${(_backendPaymentStatus ?? 'completed').toUpperCase()}"),
             const SizedBox(height: 8),
             Text("Date: ${_today()}"),
             const SizedBox(height: 12),
             const Text(
-              "Note: This is frontend only for now. Backend receipt will come later.",
+              "Note: This receipt is based on backend response.",
               style: TextStyle(fontSize: 12, color: Colors.black54),
             )
           ],
@@ -117,6 +161,10 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final totalText = (_backendTotal == null)
+        ? "Will be calculated by backend"
+        : "\$${_backendTotal!.toStringAsFixed(2)}";
+
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -177,14 +225,15 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
                     children: [
                       const Text(
                         "Payment Summary",
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        style:
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                       const SizedBox(height: 12),
-                      _summaryRow("Booking ID", "#${widget.bookingId}"),
+                      _summaryRow("Reservation ID", "#${widget.bookingId}"),
                       const SizedBox(height: 8),
                       _summaryRow(
                         "Final Total",
-                        "\$${widget.totalAmount.toStringAsFixed(2)}",
+                        totalText,
                         isBold: true,
                       ),
                     ],
@@ -200,7 +249,8 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
                     children: [
                       const Text(
                         "Payment Method",
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        style:
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                       const SizedBox(height: 12),
                       Row(
@@ -210,7 +260,9 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
                               title: "Card",
                               icon: Icons.credit_card,
                               selected: _method == PaymentMethod.card,
-                              onTap: () => setState(() => _method = PaymentMethod.card),
+                              onTap: () => setState(() {
+                                _method = PaymentMethod.card;
+                              }),
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -219,7 +271,9 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
                               title: "Cash",
                               icon: Icons.payments,
                               selected: _method == PaymentMethod.cash,
-                              onTap: () => setState(() => _method = PaymentMethod.cash),
+                              onTap: () => setState(() {
+                                _method = PaymentMethod.cash;
+                              }),
                             ),
                           ),
                         ],
@@ -247,10 +301,10 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
                         children: [
                           const Text(
                             "Card Details",
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            style:
+                            TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                           ),
                           const SizedBox(height: 12),
-
                           _fieldWithTitle(
                             title: "Card Number",
                             controller: _cardNumber,
@@ -263,9 +317,7 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
                               return null;
                             },
                           ),
-
                           const SizedBox(height: 14),
-
                           Row(
                             children: [
                               Expanded(
@@ -330,8 +382,9 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
                       Icon(Icons.check_circle, color: Colors.green, size: 22),
                       SizedBox(width: 8),
                       Text(
-                        "Payment Completed",
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        "Payment Saved",
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
                       )
                     ],
                   ),
@@ -439,10 +492,13 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(left, style: const TextStyle(color: Colors.black54)),
-        Text(
-          right,
-          style: TextStyle(
-            fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
+        Flexible(
+          child: Text(
+            right,
+            textAlign: TextAlign.right,
+            style: TextStyle(
+              fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
+            ),
           ),
         ),
       ],
@@ -461,7 +517,9 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: selected ? const Color(0xFF49C5E0).withOpacity(0.18) : Colors.grey.shade100,
+          color: selected
+              ? const Color(0xFF49C5E0).withOpacity(0.18)
+              : Colors.grey.shade100,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: selected ? const Color(0xFF49C5E0) : Colors.transparent,
@@ -470,7 +528,9 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
         ),
         child: Column(
           children: [
-            Icon(icon, color: selected ? const Color(0xFF004760) : Colors.black54),
+            Icon(icon,
+                color:
+                selected ? const Color(0xFF004760) : Colors.black54),
             const SizedBox(height: 6),
             Text(
               title,
@@ -512,7 +572,8 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
             hintText: hint,
             filled: true,
             fillColor: Colors.grey.shade100,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide: BorderSide.none,
