@@ -28,11 +28,13 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
   bool _isProcessing = false;
   bool _paymentSuccess = false;
 
-  // backend values
-  String? _receiptId; // payment_id from backend
-  double? _backendTotal; // total_amount from backend
-  String? _backendPaymentStatus; // pending/completed
-  int? _backendRentalId; // rental_id from backend (if you want)
+  String? _receiptId;
+  double? _backendTotal;
+  String? _backendPaymentStatus;
+  int? _backendRentalId;
+
+  static const Color kPrimary = Color(0xFF49C5E0);
+  static const Color kDarkBlue = Color(0xFF004760);
 
   @override
   void dispose() {
@@ -48,7 +50,6 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
   }
 
   Future<void> _confirmPayment() async {
-    // Validate card only if card selected
     if (_method == PaymentMethod.card) {
       if (!_formKey.currentState!.validate()) return;
     }
@@ -69,7 +70,6 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
           'Authorization': 'Bearer $token',
         },
         body: jsonEncode({
-          // ✅ Option A: backend calculates amount, so DON'T send amount
           "reservation": widget.bookingId,
           "method": _method == PaymentMethod.card ? "card" : "cash",
         }),
@@ -81,12 +81,10 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
         setState(() {
           _paymentSuccess = true;
           _receiptId = data['payment_id']?.toString();
-          _backendRentalId = data['rental_id'] is int
-              ? data['rental_id']
-              : int.tryParse(data['rental_id']?.toString() ?? '');
+          _backendRentalId = int.tryParse(data['rental_id'].toString());
           _backendTotal =
-              double.tryParse(data['total_amount']?.toString() ?? '0') ?? 0.0;
-          _backendPaymentStatus = data['payment_status']?.toString();
+              double.tryParse(data['total_amount'].toString()) ?? 0.0;
+          _backendPaymentStatus = data['payment_status'];
         });
 
         final msg = (_backendPaymentStatus == 'pending')
@@ -94,30 +92,18 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
             : "Payment completed successfully.";
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(msg), backgroundColor: Colors.green),
+          SnackBar(content: Text(msg), backgroundColor: kPrimary),
         );
       } else {
-        // try parse backend error
-        String message = "Payment failed.";
-        try {
-          final err = jsonDecode(response.body);
-          message = err['error']?.toString() ?? message;
-        } catch (_) {}
-        throw message;
+        throw "Payment failed.";
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
       );
     } finally {
-      setState(() {
-        _isProcessing = false;
-      });
+      setState(() => _isProcessing = false);
     }
-  }
-
-  void _cancel() {
-    Navigator.pop(context);
   }
 
   void _viewReceipt() {
@@ -129,24 +115,14 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Receipt ID: ${_receiptId ?? '-'}"),
-            const SizedBox(height: 8),
+            Text("Receipt ID: $_receiptId"),
             Text("Reservation ID: ${widget.bookingId}"),
-            const SizedBox(height: 8),
-            if (_backendRentalId != null) Text("Rental ID: $_backendRentalId"),
-            if (_backendRentalId != null) const SizedBox(height: 8),
-            Text("Amount: \$${(_backendTotal ?? 0).toStringAsFixed(2)}"),
-            const SizedBox(height: 8),
+            if (_backendRentalId != null)
+              Text("Rental ID: $_backendRentalId"),
+            Text("Amount: \$${_backendTotal?.toStringAsFixed(2)}"),
             Text("Method: ${_method == PaymentMethod.card ? "Card" : "Cash"}"),
-            const SizedBox(height: 8),
-            Text("Status: ${(_backendPaymentStatus ?? 'completed').toUpperCase()}"),
-            const SizedBox(height: 8),
+            Text("Status: ${_backendPaymentStatus?.toUpperCase()}"),
             Text("Date: ${_today()}"),
-            const SizedBox(height: 12),
-            const Text(
-              "Note: This receipt is based on backend response.",
-              style: TextStyle(fontSize: 12, color: Colors.black54),
-            )
           ],
         ),
         actions: [
@@ -167,8 +143,6 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
 
     return Scaffold(
       body: Container(
-        width: double.infinity,
-        height: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -184,17 +158,16 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(20),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(height: 12),
+                const SizedBox(height: 20),
 
-                // Logo
                 CircleAvatar(
                   radius: 45,
                   backgroundColor: Colors.white,
                   child: CircleAvatar(
                     radius: 42,
-                    backgroundImage: const AssetImage('assets/images/logo.jpg'),
+                    backgroundImage:
+                    const AssetImage('assets/images/logo.jpg'),
                   ),
                 ),
 
@@ -209,7 +182,7 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
 
                 Text(
                   "Pay Date: ${_today()}",
@@ -218,72 +191,40 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
 
                 const SizedBox(height: 24),
 
-                // Summary card
-                _whiteCard(
+                _card(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        "Payment Summary",
-                        style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
+                      const Text("Payment Summary",
+                          style: TextStyle(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 12),
-                      _summaryRow("Reservation ID", "#${widget.bookingId}"),
-                      const SizedBox(height: 8),
-                      _summaryRow(
-                        "Final Total",
-                        totalText,
-                        isBold: true,
-                      ),
+                      _row("Reservation ID", "#${widget.bookingId}"),
+                      _row("Final Total", totalText, bold: true),
                     ],
                   ),
                 ),
 
                 const SizedBox(height: 18),
 
-                // Method selector
-                _whiteCard(
+                _card(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        "Payment Method",
-                        style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
+                      const Text("Payment Method",
+                          style: TextStyle(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 12),
                       Row(
                         children: [
-                          Expanded(
-                            child: _methodTile(
-                              title: "Card",
-                              icon: Icons.credit_card,
-                              selected: _method == PaymentMethod.card,
-                              onTap: () => setState(() {
-                                _method = PaymentMethod.card;
+                          _methodTile("Card", Icons.credit_card,
+                              _method == PaymentMethod.card, () {
+                                setState(() => _method = PaymentMethod.card);
                               }),
-                            ),
-                          ),
                           const SizedBox(width: 12),
-                          Expanded(
-                            child: _methodTile(
-                              title: "Cash",
-                              icon: Icons.payments,
-                              selected: _method == PaymentMethod.cash,
-                              onTap: () => setState(() {
-                                _method = PaymentMethod.cash;
+                          _methodTile("Cash", Icons.payments,
+                              _method == PaymentMethod.cash, () {
+                                setState(() => _method = PaymentMethod.cash);
                               }),
-                            ),
-                          ),
                         ],
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        _method == PaymentMethod.cash
-                            ? "Cash payments will be marked as Pending Verification."
-                            : "Enter your card details below.",
-                        style: const TextStyle(color: Colors.black54),
                       ),
                     ],
                   ),
@@ -291,180 +232,59 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
 
                 const SizedBox(height: 18),
 
-                // Card fields only if card selected
-                if (_method == PaymentMethod.card) ...[
-                  _whiteCard(
+                if (_method == PaymentMethod.card)
+                  _card(
                     child: Form(
                       key: _formKey,
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            "Card Details",
-                            style:
-                            TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                          ),
-                          const SizedBox(height: 12),
-                          _fieldWithTitle(
-                            title: "Card Number",
-                            controller: _cardNumber,
-                            hint: "XXXX XXXX XXXX XXXX",
-                            keyboard: TextInputType.number,
-                            validator: (v) {
-                              final value = (v ?? "").replaceAll(" ", "");
-                              if (value.isEmpty) return "Card number is required";
-                              if (value.length < 12) return "Card number is too short";
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 14),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _fieldWithTitle(
-                                  title: "Expiry (MM/YY)",
-                                  controller: _expiry,
-                                  hint: "MM/YY",
-                                  keyboard: TextInputType.number,
-                                  validator: (v) {
-                                    final value = (v ?? "").trim();
-                                    if (value.isEmpty) return "Expiry is required";
-                                    if (!RegExp(r'^\d{2}/\d{2}$').hasMatch(value)) {
-                                      return "Use MM/YY";
-                                    }
-                                    return null;
-                                  },
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: _fieldWithTitle(
-                                  title: "CVV",
-                                  controller: _cvv,
-                                  hint: "123",
-                                  keyboard: TextInputType.number,
-                                  validator: (v) {
-                                    final value = (v ?? "").trim();
-                                    if (value.isEmpty) return "CVV is required";
-                                    if (!RegExp(r'^\d{3}$').hasMatch(value)) {
-                                      return "CVV must be 3 digits";
-                                    }
-                                    return null;
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
+                          _field("Card Number", _cardNumber),
+                          _field("Expiry (MM/YY)", _expiry),
+                          _field("CVV", _cvv),
                         ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                ],
-
-                // Processing / success
-                if (_isProcessing) ...[
-                  const SizedBox(height: 6),
-                  const CircularProgressIndicator(),
-                  const SizedBox(height: 10),
-                  const Text(
-                    "Processing transaction...",
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                  const SizedBox(height: 14),
-                ],
-
-                if (_paymentSuccess) ...[
-                  const SizedBox(height: 6),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Icon(Icons.check_circle, color: Colors.green, size: 22),
-                      SizedBox(width: 8),
-                      Text(
-                        "Payment Saved",
-                        style: TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold),
-                      )
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                ],
-
-                // Buttons
-                Row(
-                  children: [
-                    Expanded(
-                      child: SizedBox(
-                        height: 48,
-                        child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Colors.white70),
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          ),
-                          onPressed: _isProcessing ? null : _cancel,
-                          child: const Text(
-                            "CANCEL",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: SizedBox(
-                        height: 48,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF49C5E0),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          ),
-                          onPressed: _isProcessing ? null : _confirmPayment,
-                          child: const Text(
-                            "CONFIRM PAYMENT",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 14),
-
-                // Receipt button (only after success)
-                if (_paymentSuccess)
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                      ),
-                      onPressed: _viewReceipt,
-                      icon: const Icon(Icons.receipt_long, color: Colors.white),
-                      label: const Text(
-                        "VIEW RECEIPT",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
                       ),
                     ),
                   ),
 
                 const SizedBox(height: 20),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          side: const BorderSide(color: Colors.white),
+                        ),
+                        child: const Text("CANCEL"),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: (_isProcessing || _paymentSuccess)
+                            ? null
+                            : _confirmPayment,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: kPrimary,
+                        ),
+                        child: const Text("CONFIRM PAYMENT"),
+                      ),
+                    ),
+                  ],
+                ),
+
+                if (_paymentSuccess) ...[
+                  const SizedBox(height: 14),
+                  ElevatedButton.icon(
+                    onPressed: _viewReceipt,
+                    style:
+                    ElevatedButton.styleFrom(backgroundColor: kPrimary),
+                    icon: const Icon(Icons.receipt),
+                    label: const Text("VIEW RECEIPT"),
+                  ),
+                ],
               ],
             ),
           ),
@@ -473,114 +293,63 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
     );
   }
 
-  // ---------- UI Helpers ----------
+  Widget _card({required Widget child}) => Container(
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(18),
+    ),
+    child: child,
+  );
 
-  Widget _whiteCard({required Widget child}) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: child,
-    );
-  }
+  Widget _row(String l, String r, {bool bold = false}) => Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Text(l, style: const TextStyle(color: Colors.black54)),
+      Text(r,
+          style: TextStyle(
+              fontWeight: bold ? FontWeight.bold : FontWeight.w500)),
+    ],
+  );
 
-  Widget _summaryRow(String left, String right, {bool isBold = false}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(left, style: const TextStyle(color: Colors.black54)),
-        Flexible(
-          child: Text(
-            right,
-            textAlign: TextAlign.right,
-            style: TextStyle(
-              fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
-            ),
+  Widget _methodTile(
+      String title, IconData icon, bool selected, VoidCallback onTap) {
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: selected ? kPrimary.withOpacity(0.15) : Colors.grey.shade100,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+                color: selected ? kPrimary : Colors.transparent),
+          ),
+          child: Column(
+            children: [
+              Icon(icon, color: kDarkBlue),
+              const SizedBox(height: 6),
+              Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+            ],
           ),
         ),
-      ],
+      ),
     );
   }
 
-  Widget _methodTile({
-    required String title,
-    required IconData icon,
-    required bool selected,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(14),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(
-          color: selected
-              ? const Color(0xFF49C5E0).withOpacity(0.18)
-              : Colors.grey.shade100,
+  Widget _field(String label, TextEditingController c) => Padding(
+    padding: const EdgeInsets.only(bottom: 12),
+    child: TextFormField(
+      controller: c,
+      decoration: InputDecoration(
+        labelText: label,
+        filled: true,
+        fillColor: Colors.grey.shade100,
+        border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: selected ? const Color(0xFF49C5E0) : Colors.transparent,
-            width: 1.4,
-          ),
-        ),
-        child: Column(
-          children: [
-            Icon(icon,
-                color:
-                selected ? const Color(0xFF004760) : Colors.black54),
-            const SizedBox(height: 6),
-            Text(
-              title,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: selected ? const Color(0xFF004760) : Colors.black87,
-              ),
-            ),
-          ],
+          borderSide: BorderSide.none,
         ),
       ),
-    );
-  }
-
-  Widget _fieldWithTitle({
-    required String title,
-    required TextEditingController controller,
-    required String hint,
-    TextInputType keyboard = TextInputType.text,
-    String? Function(String?)? validator,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            color: Colors.black87,
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 6),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboard,
-          validator: validator,
-          decoration: InputDecoration(
-            hintText: hint,
-            filled: true,
-            fillColor: Colors.grey.shade100,
-            contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide.none,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+    ),
+  );
 }

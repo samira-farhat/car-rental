@@ -2,7 +2,6 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from datetime import timedelta
 
 from reservations.models import Reservation
 from rentals.models import Rental
@@ -16,13 +15,14 @@ def make_payment(request):
     reservation_id = request.data.get('reservation')
     method = request.data.get('method')
 
+    # 1️⃣ Validate input
     if not reservation_id or not method:
         return Response(
             {"error": "reservation and method are required"},
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    # 1️⃣ Get approved reservation
+    # 2️⃣ Get approved reservation
     try:
         reservation = Reservation.objects.get(
             reservationid=reservation_id,
@@ -35,7 +35,7 @@ def make_payment(request):
             status=status.HTTP_404_NOT_FOUND
         )
 
-    # 2️⃣ Calculate duration (CORRECT WAY)
+    # 3️⃣ Calculate duration
     duration = (reservation.enddate - reservation.startdate).days
     if duration <= 0:
         return Response(
@@ -43,23 +43,24 @@ def make_payment(request):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    # 3️⃣ Calculate total amount (CORRECT FIELD)
-    price_per_day = reservation.car.rentalpriceperday
-    total_amount = price_per_day * duration
+    # 4️⃣ Calculate total amount
+    total_amount = reservation.car.rentalpriceperday * duration
 
-    # 4️⃣ Create rental
-    rental = Rental.objects.create(
-        user=user,
+    # 5️⃣ Get or create rental (CRITICAL FIX)
+    rental, created = Rental.objects.get_or_create(
         reservation=reservation,
-        car=reservation.car,
-        startdate=reservation.startdate,
-        enddate=reservation.enddate,
-        duration=duration,
-        totalamount=total_amount,
-        status='active'
+        defaults={
+            "user": user,
+            "car": reservation.car,
+            "startdate": reservation.startdate,
+            "enddate": reservation.enddate,
+            "duration": duration,
+            "totalamount": total_amount,
+            "status": "active",
+        }
     )
 
-    # 5️⃣ Create payment (FIELD NAMES MUST MATCH MODEL)
+    # 6️⃣ Create payment
     payment = Payment.objects.create(
         UserID=user,
         RentalID=rental,
@@ -68,15 +69,16 @@ def make_payment(request):
         Status='completed' if method == 'card' else 'pending'
     )
 
-    # 6️⃣ Update reservation
-    reservation.status = 'completed'
-    reservation.save()
+    # 7️⃣ Update reservation status safely
+    if reservation.status != 'completed':
+        reservation.status = 'completed' if method == 'card' else 'approved'
+        reservation.save()
 
+    # 8️⃣ Response
     return Response({
-    "message": "Payment successful",
-    "payment_id": payment.PaymentID,
-    "rental_id": rental.rentalid,
-    "total_amount": str(total_amount),
-    "payment_status": payment.Status   # ✅ ADD THIS LINE
-}, status=status.HTTP_201_CREATED)
-
+        "message": "Payment successful",
+        "payment_id": payment.PaymentID,
+        "rental_id": rental.rentalid,
+        "total_amount": str(total_amount),
+        "payment_status": payment.Status,
+    }, status=status.HTTP_201_CREATED)
