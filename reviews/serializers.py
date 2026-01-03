@@ -16,3 +16,22 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     def get_car_image(self, obj):
         return obj.car.image
+
+
+
+# to read reviews on a certain car
+class CarReviewListSerializer(serializers.ModelSerializer):
+    user_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Review
+        fields = [
+            'reviewid',
+            'user_name',
+            'rating',
+            'description',
+            'reviewdate',
+        ]
+
+    def get_user_name(self, obj):
+        return obj.user.first_name
