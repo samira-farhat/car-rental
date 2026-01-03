@@ -19,7 +19,28 @@ const LinearGradient kBackgroundGradient = LinearGradient(
   ],
 );
 
+const LinearGradient kBackgroundGradientLight = LinearGradient(
+  begin: Alignment.topCenter,
+  end: Alignment.bottomCenter,
+  colors: [
+    Color(0xFFE3F2FD), // Very Light Blue (Sky)
+    Color(0xFFB3E5FC), // Light Cyan
+    Color(0xFF49C5E0), // Your Electric Cyan
+    Color(0xFF218BA2), // Your Steel Blue (as the darkest anchor)
+  ],
+  stops: [0.0, 0.4, 0.8, 1.0],
+);
 
+const LinearGradient kBackgroundGradientLight2 = LinearGradient(
+  begin: Alignment.topCenter,
+  end: Alignment.bottomCenter,
+  colors: [
+    Color(0xFFFFFFFF), // Pure White
+    Color(0xFFF0F9FF), // Ice Blue
+    Color(0xFF49C5E0), // Your Electric Cyan
+  ],
+  stops: [0.0, 0.5, 1.0],
+);
 // Button Styles
 
 // Common shape for primary/secondary buttons

@@ -4,6 +4,8 @@ import 'dart:convert';
 import '../../main_screens/bottom_nav_screen.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../../manager_screens/admin_dashboard.dart';
+
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -30,8 +32,8 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       return;
     }
-    // //Samira
-    // final url = Uri.parse('http://192.168.0.110:8000/api/accounts/login/');
+    //Samira
+    // final url = Uri.parse('http://localhost:8000/api/accounts/login/');
     final url = Uri.parse(
       //Mohammad
         'http://localhost:8000/api/accounts/login/'
@@ -47,23 +49,36 @@ class _LoginScreenState extends State<LoginScreen> {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final token = data['access']; // or whatever your login API returns
+        final token = data['access'];
+        final role = data['role']; // 👈 IMPORTANT
 
-        // Save token securely
+        // Save token & role securely
         await storage.write(key: 'access', value: token);
+        await storage.write(key: 'role', value: role);
 
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Login successful!"))
+          const SnackBar(content: Text("Login successful!")),
         );
 
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => BottomNavScreen(isGuest: false),
-          ),
-        );
+        // 🔀 ROLE-BASED NAVIGATION
+        if (role == 'admin') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => AdminDashboard(),
+            ),
+          );
+        } else {
+          // customer
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => BottomNavScreen(isGuest: false),
+            ),
+          );
+        }
       }
+
       else {
         // Error (like invalid credentials)
         ScaffoldMessenger.of(context).showSnackBar(

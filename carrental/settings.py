@@ -44,8 +44,13 @@ INSTALLED_APPS = [
     'wishlist',
     'reviews',
     'rest_framework_simplejwt',
+    'reservations',
     'rentals',
+
     'user_documents',
+
+    
+
 ]
 
 MIDDLEWARE = [
@@ -92,12 +97,14 @@ WSGI_APPLICATION = 'carrental.wsgi.application'
 
 DATABASES = {
     'default': {
+
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'car_rental_db',
         'USER': 'django_user',
         'PASSWORD': 'django123',
         'HOST': 'localhost',
         'PORT': '3306',
+
     }
 }
 

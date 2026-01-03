@@ -12,7 +12,7 @@ class WishlistListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         # returns wishlist items for the logged-in user only
-        return Wishlist.objects.filter(user=self.request.user)
+        return Wishlist.objects.filter(user=self.request.user).order_by('-date_added')
 
     def perform_create(self, serializer):
         car_id = self.request.data.get('carid')  # gets car id from frontend

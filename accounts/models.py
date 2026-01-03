@@ -72,25 +72,46 @@ class User(AbstractBaseUser, PermissionsMixin):
 # stores user uploaded documents such as drivers license
 # each document is linked to a user
 class Documentation(models.Model):
-    
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='documents')
-    document_type = models.CharField(max_length=50, default='Driver License')
+    documentid = models.AutoField(
+        primary_key=True,
+        db_column='DocumentID'
+    )
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='documents',
+        db_column='UserID'
+    )
+
+    document_type = models.CharField(
+        max_length=50,
+        default='Driver License',
+        db_column='DocumentType'
+    )
+
     document_image = models.FileField(
         upload_to='documents/',
         validators=[
             FileExtensionValidator(
-                allowed_extensions=['pdf', 'jpg', 'png', 'jpeg'] # allowed extensions that are the same in frontend
+                allowed_extensions=['pdf', 'jpg', 'png', 'jpeg']
             )
-        ]
-    )  # uploaded images go to media/documents/
+        ],
+        db_column='DocumentImage'
+    )
 
     status = models.CharField(
         max_length=20,
         choices=[('pending', 'pending'), ('verified', 'verified'), ('rejected', 'rejected')],
-        default='pending'
+        default='pending',
+        db_column='Status'
     )
 
-    uploaded_at = models.DateTimeField(auto_now_add=True)
+    uploaded_at = models.DateTimeField(
+        auto_now_add=True,
+        db_column='UploadedAt'
+    )
 
-    def __str__(self):
-        return f"{self.user.email} - {self.document_type}"
+    class Meta:
+        db_table = 'Documentation'
+        managed = False 
