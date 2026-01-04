@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../globals.dart';
+import '../main_screens/bottom_nav_screen.dart';
 import 'admin_damages_page.dart';
 import 'admin_reservations_page.dart';
 import 'car_manage_page.dart';
@@ -150,6 +151,37 @@ class AdminGridDashboard extends StatelessWidget {
                     );
                   },
                 ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => BottomNavScreen(isGuest: false), // admin browsing as customer
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: deepMidnightBlue, // button background
+                      foregroundColor: Colors.white, // text color
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: const Text(
+                      'View as Customer',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
               ],
             ),
           ),
