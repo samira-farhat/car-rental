@@ -101,6 +101,9 @@ class _AdminSystemSettingsPageState extends State<AdminSystemSettingsPage>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7FA),
+      appBar: AppBar(
+        automaticallyImplyLeading: true,
+      ),
       body: Column(
         children: [
           _buildTopBar(),
