@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data'; // ✅ REQUIRED FOR WEB
 
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
@@ -14,8 +14,10 @@ class UploadDocumentsScreen extends StatefulWidget {
 
 class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
   String _selectedDocumentType = 'DL';
-  File? _selectedFile;
   bool _isUploading = false;
+
+  Uint8List? _fileBytes;
+  String? _fileName;
 
   final Map<String, String> _documentTypes = {
     'DL': 'Driving License',
@@ -28,18 +30,20 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['jpg', 'png', 'pdf'],
+      withData: true, // 🔴 REQUIRED FOR WEB
     );
 
-    if (result != null && result.files.single.path != null) {
-      setState(() {
-        _selectedFile = File(result.files.single.path!);
-      });
-    }
+    if (result == null) return;
+
+    setState(() {
+      _fileBytes = result.files.single.bytes;
+      _fileName = result.files.single.name;
+    });
   }
 
   // ---------------- UPLOAD ----------------
   Future<void> _uploadDocument() async {
-    if (_selectedFile == null) {
+    if (_fileBytes == null || _fileName == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select a file')),
       );
@@ -50,7 +54,8 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
 
     try {
       await DocumentService.uploadDocument(
-        file: _selectedFile!,
+        fileBytes: _fileBytes!,
+        fileName: _fileName!,
         documentType: _selectedDocumentType,
       );
 
@@ -61,11 +66,11 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
         ),
       );
 
-      Navigator.pop(context, true); // 🔄 return success
+      Navigator.pop(context, true); // return success
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Upload failed'),
+        SnackBar(
+          content: Text('Upload failed: $e'),
           backgroundColor: Colors.red,
         ),
       );
@@ -121,9 +126,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        _selectedFile != null
-                            ? _selectedFile!.path.split('/').last
-                            : 'Choose file (PDF / JPG / PNG)',
+                        _fileName ?? 'Choose file (PDF / JPG / PNG)',
                         style: const TextStyle(color: Colors.black54),
                       ),
                     ),

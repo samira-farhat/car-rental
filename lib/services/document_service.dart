@@ -1,12 +1,10 @@
 import 'dart:convert';
-import 'dart:io';
-
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:path/path.dart';
+import 'dart:typed_data'; // ✅ REQUIRED FOR Uint8List
 
 class DocumentService {
-  static const String baseUrl = 'http://localhost:8000/api/documents/';
+  static const String baseUrl = 'http://127.0.0.1:8000/api/documents/';
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
 
   /// ==============================
@@ -30,10 +28,11 @@ class DocumentService {
   }
 
   /// ==============================
-  /// UPLOAD DOCUMENT (MULTIPART)
+  /// UPLOAD DOCUMENT (WEB SAFE)
   /// ==============================
   static Future<void> uploadDocument({
-    required File file,
+    required Uint8List fileBytes,
+    required String fileName,
     required String documentType,
   }) async {
     final token = await _storage.read(key: 'access');
@@ -44,23 +43,22 @@ class DocumentService {
     );
 
     request.headers['Authorization'] = 'Bearer $token';
-
-    // Add document type
     request.fields['document_type'] = documentType;
 
-    // Add file
     request.files.add(
-      await http.MultipartFile.fromPath(
+      http.MultipartFile.fromBytes(
         'document_image',
-        file.path,
-        filename: basename(file.path),
+        fileBytes,
+        filename: fileName,
       ),
     );
 
     final response = await request.send();
 
     if (response.statusCode != 201) {
-      throw Exception('Document upload failed');
+      final body = await response.stream.bytesToString();
+      throw Exception('Upload failed: $body');
     }
   }
+
 }
