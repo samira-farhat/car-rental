@@ -5,7 +5,9 @@ import 'package:flutter/foundation.dart' show kIsWeb; // Detect web
 import 'package:file_picker/file_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert'; // for jsonDecode
+import 'dart:convert';
+
+import 'auth_service.dart'; // for jsonDecode
 
 Future<Map<String, dynamic>> registerUser({
   required String firstName,
@@ -108,6 +110,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   File? documentFile; // used fo mobile
   Uint8List? documentBytes; // used for web
   String? documentExtension; // for web file extension
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -219,8 +224,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 );
 
                                 if (result['success']) {
-                                  Navigator.pushNamed(context, '/login');
+
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Verification code sent to your email')),
+                                  );
+
+                                  // go to verify screen
+                                  Navigator.pushReplacementNamed(
+                                    context,
+                                    '/verify',
+                                    arguments: {
+                                      'email': emailController.text,
+                                      'password': passwordController.text, // <-- include password
+                                    },
+                                  );
                                 }
+
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: steelBlue,
@@ -478,3 +497,4 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 }
+

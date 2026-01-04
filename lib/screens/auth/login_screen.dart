@@ -65,10 +65,24 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
       else {
-        // Error (like invalid credentials)
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(data['error'] ?? 'Login failed'))
-        );
+        if (data['error'] == 'Please verify your account first') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Please verify your email first')),
+          );
+
+          Navigator.pushReplacementNamed(
+            context,
+            '/verify',
+            arguments: {
+              'email': email,
+              'password': password, // <-- include password
+            },
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(data['error'] ?? 'Login failed')),
+          );
+        }
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

@@ -1,4 +1,5 @@
 import 'package:car_management_frontend/main_screens/bottom_nav_screen.dart';
+import 'package:car_management_frontend/screens/auth/verify_account_screen.dart';
 import 'package:car_management_frontend/screens/customer_screens/payment_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,7 +41,14 @@ class MyApp extends StatelessWidget {
         '/forgot_password': (context) => ForgotPasswordScreen(),
         '/home': (context) => HomeScreen(),
         '/bottom_nav': (context) => BottomNavScreen(),
-        '/payment': (context) => PaymentScreen()
+        '/payment': (context) => PaymentScreen(),
+        '/verify': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, String>;
+          return VerifyAccountScreen(
+            email: args['email']!,
+            password: args['password']!, // <-- pass the password
+          );
+        },
       },
     );
   }

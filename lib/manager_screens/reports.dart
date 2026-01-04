@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:car_management_frontend/globals.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
@@ -79,7 +80,7 @@ class _AdminReportsPageState extends State<AdminReportsPage> {
             icon: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.black,
+                color: electricCyan,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(Icons.refresh, color: Colors.white),
