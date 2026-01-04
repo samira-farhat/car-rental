@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
+import '../../widgets/review_card.dart';
 
 class CarDetailsScreen extends StatefulWidget {
   final Car car;
@@ -22,13 +23,42 @@ class CarDetailsScreen extends StatefulWidget {
 class _CarDetailsScreenState extends State<CarDetailsScreen> {
   final Color midnightBlue = Color(0xFF004760);
 
+  List reviews = [];
+  bool isLoadingReviews = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchReviews();
+  }
+
+  Future<void> fetchReviews() async {
+    try {
+      final response = await http.get(
+        Uri.parse(
+            'http://localhost:8000/api/reviews/car/${widget.car.carId}/'),
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          reviews = json.decode(response.body);
+          isLoadingReviews = false;
+        });
+      } else {
+        setState(() => isLoadingReviews = false);
+      }
+    } catch (_) {
+      setState(() => isLoadingReviews = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        automaticallyImplyLeading: true, // back button only
+        automaticallyImplyLeading: true,
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -36,9 +66,8 @@ class _CarDetailsScreenState extends State<CarDetailsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
 
-            SizedBox(height: 20), // top spacing
+            SizedBox(height: 20),
 
-            // car image
             Image.network(
               widget.car.imageUrl,
               width: double.infinity,
@@ -54,7 +83,6 @@ class _CarDetailsScreenState extends State<CarDetailsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
 
-                  // car brand & model
                   Text(
                     '${widget.car.brand} ${widget.car.model}',
                     style: TextStyle(
@@ -66,18 +94,13 @@ class _CarDetailsScreenState extends State<CarDetailsScreen> {
 
                   SizedBox(height: 4),
 
-                  // car year & category
                   Text(
                     '${widget.car.year} • ${widget.car.categoryName}',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: midnightBlue,
-                    ),
+                    style: TextStyle(fontSize: 16, color: midnightBlue),
                   ),
 
                   SizedBox(height: 8),
 
-                  // cars price per day
                   Text(
                     '\$${widget.car.rentalPricePerDay} / day',
                     style: TextStyle(
@@ -89,13 +112,13 @@ class _CarDetailsScreenState extends State<CarDetailsScreen> {
 
                   SizedBox(height: 5),
 
-                  // cars availability status
                   Text(
                     widget.car.availabilityStatus.toUpperCase(),
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      color: widget.car.availabilityStatus.toUpperCase() == "AVAILABLE"
+                      color: widget.car.availabilityStatus.toUpperCase() ==
+                          "AVAILABLE"
                           ? Colors.green
                           : Colors.red,
                     ),
@@ -103,22 +126,17 @@ class _CarDetailsScreenState extends State<CarDetailsScreen> {
 
                   SizedBox(height: 18),
 
-                  // car description
                   Text(
                     widget.car.description ?? 'No description available',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.black87,
-                    ),
+                    style: TextStyle(fontSize: 14),
                   ),
 
                   SizedBox(height: 32),
 
-                  // reserve & wishlist row
+                  // buttons
                   Row(
                     children: [
 
-                      // Reserve button
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () {
@@ -133,7 +151,6 @@ class _CarDetailsScreenState extends State<CarDetailsScreen> {
                           style: OutlinedButton.styleFrom(
                             side: BorderSide(color: midnightBlue, width: 2),
                             padding: EdgeInsets.symmetric(vertical: 16),
-                            foregroundColor: midnightBlue,
                           ),
                           child: Text(
                             'Reserve',
@@ -147,61 +164,89 @@ class _CarDetailsScreenState extends State<CarDetailsScreen> {
 
                       SizedBox(width: 16),
 
-                      // Wishlist Heart
                       ValueListenableBuilder<List<int>>(
                         valueListenable: wishlistedCarsNotifier,
                         builder: (context, wishlisted, child) {
-                          final isWishlisted = wishlisted.contains(widget.car.carId);
+                          final isWishlisted =
+                          wishlisted.contains(widget.car.carId);
 
                           return IconButton(
                             iconSize: 32,
                             icon: Icon(
-                              isWishlisted ? Icons.favorite : Icons.favorite_border,
-                              color: isWishlisted ? Colors.red : Colors.grey,
+                              isWishlisted
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color:
+                              isWishlisted ? Colors.red : Colors.grey,
                             ),
                             onPressed: () async {
-                              final storage = const FlutterSecureStorage();
-                              final token = await storage.read(key: 'access');
+                              final storage =
+                              const FlutterSecureStorage();
+                              final token =
+                              await storage.read(key: 'access');
 
                               if (isWishlisted) {
-                                // remove locally
                                 wishlistedCarsNotifier.value =
-                                List.from(wishlisted)..remove(widget.car.carId);
+                                List.from(wishlisted)
+                                  ..remove(widget.car.carId);
 
-                                // remove backend
-                                final url = Uri.parse(
-                                    'http://localhost:8000/api/wishlist/${widget.car.carId}/');
                                 await http.delete(
-                                  url,
+                                  Uri.parse(
+                                      'http://localhost:8000/api/wishlist/${widget.car.carId}/'),
                                   headers: {
-                                    'Content-Type': 'application/json',
                                     'Authorization': 'Bearer $token',
                                   },
                                 );
                               } else {
-                                // add locally
                                 wishlistedCarsNotifier.value =
-                                List.from(wishlisted)..add(widget.car.carId);
+                                List.from(wishlisted)
+                                  ..add(widget.car.carId);
 
-                                // add backend
-                                final url = Uri.parse(
-                                    'http://localhost:8000/api/wishlist/');
                                 await http.post(
-                                  url,
+                                  Uri.parse(
+                                      'http://localhost:8000/api/wishlist/'),
                                   headers: {
-                                    'Content-Type': 'application/json',
                                     'Authorization': 'Bearer $token',
+                                    'Content-Type': 'application/json',
                                   },
-                                  body: jsonEncode({'carid': widget.car.carId}),
+                                  body: jsonEncode(
+                                      {'carid': widget.car.carId}),
                                 );
                               }
                             },
                           );
                         },
                       ),
-
                     ],
                   ),
+
+                  SizedBox(height: 25),
+
+                  // reviews section
+                  Text(
+                    'REVIEWS',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: midnightBlue,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+
+                  SizedBox(height: 12),
+
+                  if (isLoadingReviews)
+                    Center(child: CircularProgressIndicator()),
+
+                  if (!isLoadingReviews && reviews.isEmpty)
+                    Text(
+                      'No reviews yet',
+                      style: TextStyle(color: Colors.grey.shade600),
+                    ),
+
+                  if (!isLoadingReviews)
+                    ...reviews.map((review) => ReviewCard(review: review)),
+
                 ],
               ),
             ),
