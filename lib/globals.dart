@@ -7,7 +7,7 @@ Color steelBlue = Color(0xFF218BA2);
 Color jetBlack =  Color(0xFF000000);
 Color electricCyan = Color(0xFF49C5E0);
 Color deepMidnightBlue = Color(0xFF004760);
-
+const String baseUrl = "http://localhost:8000/api";
 const LinearGradient kBackgroundGradient = LinearGradient(
   begin: Alignment.topCenter,
   end: Alignment.bottomCenter,

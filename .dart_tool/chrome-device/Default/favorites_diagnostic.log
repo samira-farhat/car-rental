@@ -361,3 +361,63 @@
 2025-12-31 13:02:36.990: [INFO] BookmarkModelLoaded, ids_reassigned: 0
 2025-12-31 13:02:36.990: [INFO] OnDoneLoading sync enabled: 1
 2025-12-31 13:02:40.797: [INFO] Sync initialization duration: 3316ms
+2026-01-02 22:28:18.130: [INFO] VisibilityChanged: 0
+2026-01-02 22:28:18.170: [INFO] BookmarkModelLoaded, ids_reassigned: 0
+2026-01-02 22:28:18.170: [INFO] OnDoneLoading sync enabled: 1
+2026-01-02 22:28:23.805: [INFO] Sync initialization duration: 5428ms
+2026-01-02 22:41:22.639: [INFO] VisibilityChanged: 0
+2026-01-02 22:41:22.712: [INFO] BookmarkModelLoaded, ids_reassigned: 0
+2026-01-02 22:41:22.712: [INFO] OnDoneLoading sync enabled: 1
+2026-01-02 22:41:30.909: [INFO] Sync initialization duration: 7717ms
+2026-01-02 22:53:04.800: [INFO] VisibilityChanged: 0
+2026-01-02 22:53:04.870: [INFO] BookmarkModelLoaded, ids_reassigned: 0
+2026-01-02 22:53:04.870: [INFO] OnDoneLoading sync enabled: 1
+2026-01-02 22:53:11.400: [INFO] Sync initialization duration: 5999ms
+2026-01-03 16:24:25.101: [INFO] VisibilityChanged: 0
+2026-01-03 16:24:25.162: [INFO] BookmarkModelLoaded, ids_reassigned: 0
+2026-01-03 16:24:25.162: [INFO] OnDoneLoading sync enabled: 1
+2026-01-03 16:24:32.361: [INFO] Sync initialization duration: 6675ms
+2026-01-03 16:26:01.262: [INFO] VisibilityChanged: 0
+2026-01-03 16:26:01.330: [INFO] BookmarkModelLoaded, ids_reassigned: 0
+2026-01-03 16:26:01.330: [INFO] OnDoneLoading sync enabled: 1
+2026-01-03 16:26:16.608: [INFO] Sync initialization duration: 14787ms
+2026-01-03 17:21:19.150: [INFO] VisibilityChanged: 0
+2026-01-03 17:21:19.216: [INFO] BookmarkModelLoaded, ids_reassigned: 0
+2026-01-03 17:21:19.216: [INFO] OnDoneLoading sync enabled: 1
+2026-01-03 17:21:26.912: [INFO] Sync initialization duration: 7265ms
+2026-01-03 19:21:45.866: [INFO] VisibilityChanged: 0
+2026-01-03 19:21:45.901: [INFO] BookmarkModelLoaded, ids_reassigned: 0
+2026-01-03 19:21:45.901: [INFO] OnDoneLoading sync enabled: 1
+2026-01-03 19:21:52.174: [INFO] Sync initialization duration: 6072ms
+2026-01-03 19:46:55.998: [INFO] VisibilityChanged: 0
+2026-01-03 19:46:56.078: [INFO] BookmarkModelLoaded, ids_reassigned: 0
+2026-01-03 19:46:56.078: [INFO] OnDoneLoading sync enabled: 1
+2026-01-03 19:47:07.099: [INFO] Sync initialization duration: 10607ms
+2026-01-03 21:10:12.635: [INFO] VisibilityChanged: 0
+2026-01-03 21:10:12.676: [INFO] BookmarkModelLoaded, ids_reassigned: 0
+2026-01-03 21:10:12.676: [INFO] OnDoneLoading sync enabled: 1
+2026-01-03 21:10:19.053: [INFO] Sync initialization duration: 6157ms
+2026-01-04 09:19:18.949: [INFO] VisibilityChanged: 0
+2026-01-04 09:19:19.021: [INFO] BookmarkModelLoaded, ids_reassigned: 0
+2026-01-04 09:19:19.021: [INFO] OnDoneLoading sync enabled: 1
+2026-01-04 09:19:23.594: [INFO] Sync initialization duration: 4011ms
+2026-01-04 09:28:44.645: [INFO] VisibilityChanged: 0
+2026-01-04 09:28:44.706: [INFO] BookmarkModelLoaded, ids_reassigned: 0
+2026-01-04 09:28:44.706: [INFO] OnDoneLoading sync enabled: 1
+2026-01-04 09:28:49.861: [INFO] Sync initialization duration: 4619ms
+2026-01-04 09:35:01.068: [INFO] VisibilityChanged: 0
+2026-01-04 09:35:01.144: [INFO] BookmarkModelLoaded, ids_reassigned: 0
+2026-01-04 09:35:01.144: [INFO] OnDoneLoading sync enabled: 1
+2026-01-04 09:35:07.106: [INFO] Sync initialization duration: 5398ms
+2026-01-04 09:45:11.472: [INFO] VisibilityChanged: 0
+2026-01-04 09:45:11.559: [INFO] BookmarkModelLoaded, ids_reassigned: 0
+2026-01-04 09:45:11.559: [INFO] OnDoneLoading sync enabled: 1
+2026-01-04 09:45:16.742: [INFO] Sync initialization duration: 4510ms
+2026-01-04 10:09:39.079: [INFO] VisibilityChanged: 0
+2026-01-04 10:09:39.177: [INFO] BookmarkModelLoaded, ids_reassigned: 0
+2026-01-04 10:09:39.177: [INFO] OnDoneLoading sync enabled: 1
+2026-01-04 10:09:45.966: [INFO] Sync initialization duration: 6236ms
+2026-01-04 12:10:27.470: [INFO] VisibilityChanged: 0
+2026-01-04 12:10:27.575: [INFO] BookmarkModelLoaded, ids_reassigned: 0
+2026-01-04 12:10:27.575: [INFO] OnDoneLoading sync enabled: 1
+2026-01-04 12:10:34.678: [INFO] Sync initialization duration: 6452ms

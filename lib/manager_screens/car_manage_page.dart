@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:car_management_frontend/globals.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -120,7 +121,7 @@ class _AdminCarsPageState extends State<AdminCarsPage> with TickerProviderStateM
             },
             icon: Container(
               padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(12)),
+              decoration: BoxDecoration(color: electricCyan, borderRadius: BorderRadius.circular(12)),
               child: const Icon(Icons.add, color: Colors.white),
             ),
           )

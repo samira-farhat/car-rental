@@ -40,6 +40,7 @@ urlpatterns = [
     path('api/payments/', include('payments.urls')),
     path('api/', include('system_settings.urls')),
     path('api/', include('notifications.urls')),
+    path('api/', include('dashboard.urls')),
 
 ]
 

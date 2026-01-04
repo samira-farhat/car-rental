@@ -1,3 +1,4 @@
+import 'package:car_management_frontend/globals.dart';
 import 'package:flutter/material.dart';
 import '../models/reservation_model.dart';
 import 'AdminReservationDetailsPage.dart';
@@ -92,7 +93,7 @@ class _AdminReservationsPageState extends State<AdminReservationsPage>
           ),
           Container(
             padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(14)),
+            decoration: BoxDecoration(color: electricCyan, borderRadius: BorderRadius.circular(14)),
             child: const Icon(Icons.analytics_outlined, color: Colors.white, size: 20),
           )
         ],

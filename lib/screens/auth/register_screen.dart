@@ -5,7 +5,9 @@ import 'package:flutter/foundation.dart' show kIsWeb; // Detect web
 import 'package:file_picker/file_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert'; // for jsonDecode
+import 'dart:convert';
+
+import 'auth_service.dart'; // for jsonDecode
 
 Future<Map<String, dynamic>> registerUser({
   required String firstName,
@@ -108,6 +110,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   File? documentFile; // used fo mobile
   Uint8List? documentBytes; // used for web
   String? documentExtension; // for web file extension
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -219,8 +224,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 );
 
                                 if (result['success']) {
-                                  Navigator.pushNamed(context, '/login');
+
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Verification code sent to your email')),
+                                  );
+
+                                  // go to verify screen
+                                  Navigator.pushReplacementNamed(
+                                    context,
+                                    '/verify',
+                                    arguments: {
+                                      'email': emailController.text,
+                                      'password': passwordController.text, // <-- include password
+                                    },
+                                  );
                                 }
+
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: steelBlue,
@@ -371,54 +390,81 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Widget uploadLicenseButton() {
+    final bool hasFile = documentFile != null || documentBytes != null;
+
     return GestureDetector(
       onTap: () async {
-        // on mobile:
+        // Mobile permission
         if (!kIsWeb) {
           PermissionStatus status = await Permission.storage.request();
           if (!status.isGranted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                  content: Text(
-                      'Storage permission is required to upload the license')),
+              const SnackBar(
+                content: Text('Storage permission is required'),
+              ),
             );
             return;
           }
         }
 
-        // pick file
+        // Pick file
         FilePickerResult? result = await FilePicker.platform.pickFiles(
           type: FileType.custom,
           allowedExtensions: ['pdf', 'jpg', 'png', 'jpeg'],
-          withData: kIsWeb, // to import from web
+          withData: kIsWeb,
         );
 
         if (result != null) {
           setState(() {
             if (kIsWeb) {
-              documentBytes = result.files.single.bytes; // for web
-              documentExtension =
-                  result.files.single.extension; // save extension
+              documentBytes = result.files.single.bytes;
+              documentExtension = result.files.single.extension;
             } else {
-              documentFile =
-                  File(result.files.single.path!); // for mobile
+              documentFile = File(result.files.single.path!);
             }
           });
         }
       },
-      child: Text(
-        (documentFile != null || documentBytes != null)
-            ? 'License Selected'
-            : 'Upload License *',
-        style: TextStyle(
-          color: Colors.redAccent,
-          decoration: TextDecoration.underline,
-          fontWeight: FontWeight.bold,
-          fontSize: 15,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: hasFile ? Colors.greenAccent : Colors.redAccent,
+            width: 1.4,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              hasFile ? Icons.check_circle : Icons.upload_file,
+              color: hasFile ? Colors.greenAccent : Colors.white,
+              size: 26,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                hasFile
+                    ? 'License Selected'
+                    : 'Upload Driver License *',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                ),
+              ),
+            ),
+            const Icon(
+              Icons.chevron_right,
+              color: Colors.white54,
+            ),
+          ],
         ),
       ),
     );
   }
+
 
   Widget buildRequiredField(
       TextEditingController controller, String label, String error) {
@@ -478,3 +524,4 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 }
+

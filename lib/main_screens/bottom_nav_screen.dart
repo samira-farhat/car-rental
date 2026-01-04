@@ -1,9 +1,10 @@
+import 'package:car_management_frontend/screens/customer_screens/my_rentals_screen.dart';
 import 'package:car_management_frontend/screens/customer_screens/profile_screen.dart';
 import 'package:car_management_frontend/screens/customer_screens/search_screen.dart';
 import 'package:car_management_frontend/screens/customer_screens/wishlist_screen.dart';
 import 'package:flutter/material.dart';
-import '../manager_screens/admin_damages_page.dart';
-import '../manager_screens/reports.dart';
+import '../manager_screens/admin_dashboard.dart';
+import '../manager_screens/admin_reservations_page.dart';
 import '../manager_screens/car_manage_page.dart';
 import '../screens/customer_screens/browse_screen.dart';
 import '../screens/features/reviews_screen.dart';
@@ -30,9 +31,10 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
 
     _pages = [
       Builder(builder: (_) => BrowseScreen(isGuest: widget.isGuest)), // first tab: browse cars
-      Builder(builder: (_) => AdminReportsPage()), // second tab: search
-      Builder(builder: (_) => AdminDamagesPage()), // third tab: wishlist
-      Builder(builder: (_) => ProfileScreen()), // fourth tab: profile
+      Builder(builder: (_) => SearchScreen()), // second tab: search
+      Builder(builder: (_) => MyRentalsScreen()), // third tab: my rentals
+      Builder(builder: (_) => WishlistScreen()), // fourth tab: wishlist
+      Builder(builder: (_) => ProfileScreen()), // fifth tab: profile
     ];
   }
 
@@ -69,6 +71,24 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
             icon: Icon(Icons.search),
             label: 'Search',
           ),
+
+          // CENTER – My Rentals
+          BottomNavigationBarItem(
+            icon: Container(
+              padding: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: midnightBlue,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                Icons.receipt_long, // rentals icon
+                color: Colors.white,
+                size: 26,
+              ),
+            ),
+            label: 'Rentals',
+          ),
+
           BottomNavigationBarItem(
             icon: Icon(Icons.favorite),
             label: 'Wishlist',
@@ -78,6 +98,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
             label: 'Profile',
           ),
         ],
+
       ),
     );
   }
