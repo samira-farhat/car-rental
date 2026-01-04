@@ -7,7 +7,8 @@ import uuid
 
 from .models import Payment
 from rentals.models import Rental
-
+from notifications.services.notification_service import send_notification
+from django.contrib.auth import get_user_model
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -62,8 +63,17 @@ def make_payment(request):
     payment.TransactionRef = f"PAY-{uuid.uuid4().hex[:10].upper()}"
 
     payment.save()
+    User = get_user_model()
+    admins = User.objects.filter(role__in=['admin','manager'])
+    message = f"{payment.user.first_name} {payment.user.last_name} completed a payment of ${payment.amount}."
+    send_notification(
+            admins,
+            message=message,
+            notification_type='payment',
+            channels=('in_app', 'email')
+        )
     rental.save()
-
+    
     return Response({
         "message": "Payment processed successfully",
         "payment_status": payment.Status,

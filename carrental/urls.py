@@ -38,7 +38,8 @@ urlpatterns = [
     path('api/', include('damages.urls')),
     path('api/reports/', include('reports.urls')),
     path('api/payments/', include('payments.urls')),
-     path('api/', include('system_settings.urls')),
+    path('api/', include('system_settings.urls')),
+    path('api/', include('notifications.urls')),
 
 ]
 
