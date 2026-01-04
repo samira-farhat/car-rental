@@ -2,6 +2,7 @@ import 'package:car_management_frontend/manager_screens/admin_dashboard.dart';
 import 'package:car_management_frontend/manager_screens/admin_reservations_page.dart';
 import 'package:car_management_frontend/manager_screens/car_manage_page.dart';
 import 'package:flutter/material.dart';
+import 'admin_returns_page.dart';
 
 class AdminSidebar extends StatelessWidget {
   AdminSidebar({super.key});
@@ -61,6 +62,20 @@ class AdminSidebar extends StatelessWidget {
             onTap: () {},
           ),
           _sidebarItem(
+            icon: Icons.swap_horiz,
+            title: "Manage Returns",
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const AdminReturnsPage(),
+                ),
+              );
+            },
+          ),
+
+
+          _sidebarItem(
             icon: Icons.directions_car,
             title: "Manage Car Inventory",
             onTap: () {},
@@ -99,6 +114,7 @@ class AdminSidebar extends StatelessWidget {
       ),
     );
   }
+
 
   Widget _sidebarItem({
     required IconData icon,
