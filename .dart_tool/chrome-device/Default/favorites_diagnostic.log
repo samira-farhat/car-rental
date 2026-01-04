@@ -397,3 +397,23 @@
 2026-01-03 21:10:12.676: [INFO] BookmarkModelLoaded, ids_reassigned: 0
 2026-01-03 21:10:12.676: [INFO] OnDoneLoading sync enabled: 1
 2026-01-03 21:10:19.053: [INFO] Sync initialization duration: 6157ms
+2026-01-04 09:19:18.949: [INFO] VisibilityChanged: 0
+2026-01-04 09:19:19.021: [INFO] BookmarkModelLoaded, ids_reassigned: 0
+2026-01-04 09:19:19.021: [INFO] OnDoneLoading sync enabled: 1
+2026-01-04 09:19:23.594: [INFO] Sync initialization duration: 4011ms
+2026-01-04 09:28:44.645: [INFO] VisibilityChanged: 0
+2026-01-04 09:28:44.706: [INFO] BookmarkModelLoaded, ids_reassigned: 0
+2026-01-04 09:28:44.706: [INFO] OnDoneLoading sync enabled: 1
+2026-01-04 09:28:49.861: [INFO] Sync initialization duration: 4619ms
+2026-01-04 09:35:01.068: [INFO] VisibilityChanged: 0
+2026-01-04 09:35:01.144: [INFO] BookmarkModelLoaded, ids_reassigned: 0
+2026-01-04 09:35:01.144: [INFO] OnDoneLoading sync enabled: 1
+2026-01-04 09:35:07.106: [INFO] Sync initialization duration: 5398ms
+2026-01-04 09:45:11.472: [INFO] VisibilityChanged: 0
+2026-01-04 09:45:11.559: [INFO] BookmarkModelLoaded, ids_reassigned: 0
+2026-01-04 09:45:11.559: [INFO] OnDoneLoading sync enabled: 1
+2026-01-04 09:45:16.742: [INFO] Sync initialization duration: 4510ms
+2026-01-04 10:09:39.079: [INFO] VisibilityChanged: 0
+2026-01-04 10:09:39.177: [INFO] BookmarkModelLoaded, ids_reassigned: 0
+2026-01-04 10:09:39.177: [INFO] OnDoneLoading sync enabled: 1
+2026-01-04 10:09:45.966: [INFO] Sync initialization duration: 6236ms

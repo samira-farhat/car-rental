@@ -1,3 +1,4 @@
+import 'package:car_management_frontend/screens/auth/verify_reset_code_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -41,7 +42,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(data['message'] ?? 'Password reset link sent')),
         );
-        Navigator.pop(context);
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => VerifyResetCodeScreen(email: email),
+          ),
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(data['error'] ?? 'Error sending reset link')),
@@ -183,7 +189,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
           AppLogo(size: 120), // using your global AppLogo widget
           SizedBox(height: 8),
           Text(
-            "Company Name",
+            "Drive With Khachab",
             style: TextStyle(
                 fontWeight: FontWeight.bold, color: Colors.grey, fontSize: 14),
           ),
