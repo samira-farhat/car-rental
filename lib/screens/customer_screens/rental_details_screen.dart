@@ -238,7 +238,10 @@ class _RentalDetailsScreenState extends State<RentalDetailsScreen>
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => ReturnScreen()),
+            MaterialPageRoute(
+              builder: (_) => ReturnScreen(rentalId: widget.rentalId),
+            ),
+
           );
         },
         style: OutlinedButton.styleFrom(

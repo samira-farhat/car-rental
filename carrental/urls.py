@@ -36,6 +36,8 @@ urlpatterns = [
     path('api/reviews/', include('reviews.urls')),
     path('api/', include('reservations.urls')),
     path('api/', include('dashboard.urls')),
+    path('api/returns/', include('returns.urls')),
+
 
 ]
 

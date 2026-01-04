@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'reservations',
     'rentals',
+    'returns',
+
     
 ]
 
@@ -93,14 +95,15 @@ WSGI_APPLICATION = 'carrental.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql', # to use MySQL
-        'NAME': 'CarRentalDB', # our database name
-        'USER': 'root', # MySQL username
-        'PASSWORD': 'Root', # MySQL password
-        'HOST': 'localhost', # host
-        'PORT': '3306', # default MySQL port
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'car_rental_db',      # ✅ exact DB name
+        'USER': 'django_user',        # ✅ created user
+        'PASSWORD': 'django123',      # ✅ the password you set
+        'HOST': 'localhost',
+        'PORT': '3306',
     }
 }
+
 
 # in rder to use the custom user model for authentication
 AUTH_USER_MODEL = 'accounts.User'
