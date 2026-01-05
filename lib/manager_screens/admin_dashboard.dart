@@ -20,6 +20,15 @@ class _AdminDashboardState extends State<AdminDashboard> {
     });
   }
 
+  void goToAdminReturns() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const AdminReturnsPage(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final double sidebarWidth = 260;
@@ -31,7 +40,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           // Main content
           SafeArea(
             child: Padding(
-              padding: EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(20.0),
               child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,17 +49,15 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-
                         IconButton(
                           icon: Icon(Icons.menu, color: midnightBlue, size: 28),
                           onPressed: toggleSidebar,
                         ),
-
-                        SizedBox(width: 48),
+                        const SizedBox(width: 48),
                       ],
                     ),
 
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
                     // Full-width image
                     ClipRRect(
@@ -58,20 +65,20 @@ class _AdminDashboardState extends State<AdminDashboard> {
                       child: Image.asset(
                         'assets/images/dashboard.jpeg',
                         width: double.infinity,
-                        fit: BoxFit.cover, // makes it cover full width
+                        fit: BoxFit.cover,
                       ),
                     ),
 
-                    SizedBox(height: 30),
+                    const SizedBox(height: 30),
 
                     // Dashboard cards grid
                     GridView.count(
-                      shrinkWrap: true, // important: allows grid inside scrollview
-                      physics: NeverScrollableScrollPhysics(), // scroll handled by parent
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
                       crossAxisCount: 2,
                       crossAxisSpacing: 16,
                       mainAxisSpacing: 16,
-                      children: [
+                      children: const [
                         DashboardSummaryCard(
                           title: 'Total Cars',
                           value: '10',
@@ -105,30 +112,54 @@ class _AdminDashboardState extends State<AdminDashboard> {
                       ],
                     ),
 
-                    SizedBox(height: 20),
+                    const SizedBox(height: 25),
 
+                    // ✅ MANAGE RETURNS BUTTON
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: goToAdminReturns,
+                        icon: const Icon(Icons.assignment_return, color: Colors.white),
+                        label: const Text(
+                          'MANAGE RETURNS',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.1,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: midnightBlue,
+                          padding: const EdgeInsets.symmetric(vertical: 18),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          elevation: 2,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
                   ],
-
                 ),
               ),
-
             ),
           ),
 
           // Sidebar overlay
           AnimatedPositioned(
-            duration: Duration(milliseconds: 300),
+            duration: const Duration(milliseconds: 300),
             top: 0,
             bottom: 0,
             left: isSidebarOpen ? 0 : -sidebarWidth,
             child: GestureDetector(
-              onTap: () {}, // prevents taps from closing accidentally
+              onTap: () {},
               child: Container(
                 width: sidebarWidth,
                 decoration: BoxDecoration(
                   color: midnightBlue.withOpacity(0.85),
                 ),
-                child: AdminSidebar(),
+                child:  AdminSidebar(),
               ),
             ),
           ),
