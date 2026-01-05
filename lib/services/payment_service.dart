@@ -24,7 +24,7 @@ class PaymentService {
 
     final data = jsonDecode(response.body);
 
-    if (response.statusCode == 201) {
+    if (response.statusCode == 201 || response.statusCode == 200) {
       return data;
     } else {
       throw data['error'] ?? 'Payment failed';

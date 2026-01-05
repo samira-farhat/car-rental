@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../globals.dart';
+import 'make_payment_screen.dart';
 
 class ReservationDetailsScreen extends StatefulWidget {
   final int reservationId;

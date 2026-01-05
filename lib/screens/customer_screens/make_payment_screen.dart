@@ -15,16 +15,7 @@ class MakePaymentScreen extends StatefulWidget {
   State<MakePaymentScreen> createState() => _MakePaymentScreenState();
 }
 
-enum PaymentMethod { card, cash }
-
 class _MakePaymentScreenState extends State<MakePaymentScreen> {
-  PaymentMethod _method = PaymentMethod.card;
-
-  final _formKey = GlobalKey<FormState>();
-  final _cardNumber = TextEditingController();
-  final _expiry = TextEditingController();
-  final _cvv = TextEditingController();
-
   bool _isProcessing = false;
   bool _paymentSuccess = false;
 
@@ -36,24 +27,12 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
   static const Color kPrimary = Color(0xFF49C5E0);
   static const Color kDarkBlue = Color(0xFF004760);
 
-  @override
-  void dispose() {
-    _cardNumber.dispose();
-    _expiry.dispose();
-    _cvv.dispose();
-    super.dispose();
-  }
-
   String _today() {
     final d = DateTime.now();
     return "${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}";
   }
 
   Future<void> _confirmPayment() async {
-    if (_method == PaymentMethod.card) {
-      if (!_formKey.currentState!.validate()) return;
-    }
-
     setState(() {
       _isProcessing = true;
       _paymentSuccess = false;
@@ -71,7 +50,7 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
         },
         body: jsonEncode({
           "reservation": widget.bookingId,
-          "method": _method == PaymentMethod.card ? "card" : "cash",
+          "method": "cash",
         }),
       );
 
@@ -87,12 +66,11 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
           _backendPaymentStatus = data['payment_status'];
         });
 
-        final msg = (_backendPaymentStatus == 'pending')
-            ? "Cash payment saved as Pending Verification."
-            : "Payment completed successfully.";
-
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(msg), backgroundColor: kPrimary),
+          SnackBar(
+            content: const Text("Cash payment saved as Pending Verification."),
+            backgroundColor: kPrimary,
+          ),
         );
       } else {
         throw "Payment failed.";
@@ -106,21 +84,21 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
     }
   }
 
-  void _viewReceipt() {
+  void _viewInvoice() {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text("Payment Receipt"),
+        title: const Text("Reservation Invoice"),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Receipt ID: $_receiptId"),
+            Text("Invoice ID: $_receiptId"),
             Text("Reservation ID: ${widget.bookingId}"),
             if (_backendRentalId != null)
               Text("Rental ID: $_backendRentalId"),
             Text("Amount: \$${_backendTotal?.toStringAsFixed(2)}"),
-            Text("Method: ${_method == PaymentMethod.card ? "Card" : "Cash"}"),
+            const Text("Method: Cash"),
             Text("Status: ${_backendPaymentStatus?.toUpperCase()}"),
             Text("Date: ${_today()}"),
           ],
@@ -159,7 +137,20 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
             padding: const EdgeInsets.all(20),
             child: Column(
               children: [
-                const SizedBox(height: 20),
+                // 🔙 BACK BUTTON
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back_ios,
+                      color: Colors.white,
+                      size: 26,
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ),
+
+                const SizedBox(height: 10),
 
                 CircleAvatar(
                   radius: 45,
@@ -195,8 +186,10 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text("Payment Summary",
-                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      const Text(
+                        "Payment Summary",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                       const SizedBox(height: 12),
                       _row("Reservation ID", "#${widget.bookingId}"),
                       _row("Final Total", totalText, bold: true),
@@ -209,42 +202,25 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
                 _card(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text("Payment Method",
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          _methodTile("Card", Icons.credit_card,
-                              _method == PaymentMethod.card, () {
-                                setState(() => _method = PaymentMethod.card);
-                              }),
-                          const SizedBox(width: 12),
-                          _methodTile("Cash", Icons.payments,
-                              _method == PaymentMethod.cash, () {
-                                setState(() => _method = PaymentMethod.cash);
-                              }),
-                        ],
+                    children: const [
+                      Text(
+                        "Payment Method",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: 12),
+                      ListTile(
+                        leading:
+                        Icon(Icons.payments, color: Colors.green),
+                        title: Text("Cash"),
+                        subtitle: Text("Pay at pickup / office"),
+                        trailing: Icon(
+                          Icons.check_circle,
+                          color: Colors.green,
+                        ),
                       ),
                     ],
                   ),
                 ),
-
-                const SizedBox(height: 18),
-
-                if (_method == PaymentMethod.card)
-                  _card(
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        children: [
-                          _field("Card Number", _cardNumber),
-                          _field("Expiry (MM/YY)", _expiry),
-                          _field("CVV", _cvv),
-                        ],
-                      ),
-                    ),
-                  ),
 
                 const SizedBox(height: 20),
 
@@ -278,11 +254,12 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
                 if (_paymentSuccess) ...[
                   const SizedBox(height: 14),
                   ElevatedButton.icon(
-                    onPressed: _viewReceipt,
-                    style:
-                    ElevatedButton.styleFrom(backgroundColor: kPrimary),
-                    icon: const Icon(Icons.receipt),
-                    label: const Text("VIEW RECEIPT"),
+                    onPressed: _viewInvoice,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: kPrimary,
+                    ),
+                    icon: const Icon(Icons.receipt_long),
+                    label: const Text("VIEW INVOICE"),
                   ),
                 ],
               ],
@@ -306,50 +283,12 @@ class _MakePaymentScreenState extends State<MakePaymentScreen> {
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
       Text(l, style: const TextStyle(color: Colors.black54)),
-      Text(r,
-          style: TextStyle(
-              fontWeight: bold ? FontWeight.bold : FontWeight.w500)),
+      Text(
+        r,
+        style: TextStyle(
+          fontWeight: bold ? FontWeight.bold : FontWeight.w500,
+        ),
+      ),
     ],
-  );
-
-  Widget _methodTile(
-      String title, IconData icon, bool selected, VoidCallback onTap) {
-    return Expanded(
-      child: InkWell(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: selected ? kPrimary.withOpacity(0.15) : Colors.grey.shade100,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-                color: selected ? kPrimary : Colors.transparent),
-          ),
-          child: Column(
-            children: [
-              Icon(icon, color: kDarkBlue),
-              const SizedBox(height: 6),
-              Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _field(String label, TextEditingController c) => Padding(
-    padding: const EdgeInsets.only(bottom: 12),
-    child: TextFormField(
-      controller: c,
-      decoration: InputDecoration(
-        labelText: label,
-        filled: true,
-        fillColor: Colors.grey.shade100,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide.none,
-        ),
-      ),
-    ),
   );
 }
