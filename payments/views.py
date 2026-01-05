@@ -23,7 +23,7 @@ def make_payment(request):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    # ✅ Get approved reservation for this user
+    # Get approved reservation
     try:
         reservation = Reservation.objects.select_for_update().get(
             reservationid=reservation_id,
@@ -36,14 +36,10 @@ def make_payment(request):
             status=status.HTTP_404_NOT_FOUND
         )
 
-    # ✅ duration (match your approval logic: inclusive)
     duration = (reservation.enddate - reservation.startdate).days + 1
-    if duration <= 0:
-        return Response({"error": "Invalid reservation dates"}, status=400)
-
     total_amount = reservation.car.rentalpriceperday * duration
 
-    # ✅ get or create rental linked to reservation
+    # Create or get rental
     rental, created = Rental.objects.get_or_create(
         reservation=reservation,
         defaults={
@@ -53,42 +49,40 @@ def make_payment(request):
             "enddate": reservation.enddate,
             "duration": duration,
             "totalamount": total_amount,
-            "status": "active",  # ✅ until payment confirmed
+            "status": "pending_payment",  # ✅ STAYS pending
         }
     )
 
-    # ✅ prevent double payment
-    existing_payment = Payment.objects.filter(RentalID=rental, UserID=user).first()
+    # Prevent double payment
+    existing_payment = Payment.objects.filter(
+        RentalID=rental,
+        UserID=user
+    ).first()
+
     if existing_payment:
         return Response({
             "message": "Payment already submitted",
             "payment_id": existing_payment.PaymentID,
             "rental_id": rental.rentalid,
-            "total_amount": str(rental.totalamount),
             "payment_status": existing_payment.Status,
         }, status=status.HTTP_200_OK)
 
-    # ✅ create payment
+    # Create payment (ALWAYS pending)
     payment = Payment.objects.create(
         UserID=user,
         RentalID=rental,
         Amount=total_amount,
         Method=method,
-        Status='pending' if method == 'cash' else 'completed'
+        Status='pending'
     )
 
-    # ✅ after payment request:
-    rental.status = 'active'
-    rental.save()
-
-    reservation.status = 'active'
-    reservation.save()
-
+    # ❌ DO NOT touch rental or reservation status here
 
     return Response({
-        "message": "Payment successful",
+        "message": "Invoice created. Awaiting manager approval.",
         "payment_id": payment.PaymentID,
         "rental_id": rental.rentalid,
         "total_amount": str(total_amount),
         "payment_status": payment.Status,
+        "rental_status": rental.status,
     }, status=status.HTTP_201_CREATED)

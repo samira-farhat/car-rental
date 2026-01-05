@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/dashboard_summary_card.dart';
 import 'admin_sidebar.dart';
+import 'admin_rentals_page.dart';
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
@@ -30,7 +31,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           // Main content
           SafeArea(
             child: Padding(
-              padding: EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(20.0),
               child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,17 +40,15 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-
                         IconButton(
                           icon: Icon(Icons.menu, color: midnightBlue, size: 28),
                           onPressed: toggleSidebar,
                         ),
-
-                        SizedBox(width: 48),
+                        const SizedBox(width: 48),
                       ],
                     ),
 
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
                     // Full-width image
                     ClipRRect(
@@ -57,20 +56,52 @@ class _AdminDashboardState extends State<AdminDashboard> {
                       child: Image.asset(
                         'assets/images/dashboard.jpeg',
                         width: double.infinity,
-                        fit: BoxFit.cover, // makes it cover full width
+                        fit: BoxFit.cover,
                       ),
                     ),
 
-                    SizedBox(height: 30),
+                    const SizedBox(height: 25),
+
+                    // 🔵 GO TO RENTALS APPROVAL BUTTON
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.assignment_turned_in),
+                        label: const Text(
+                          'MANAGE RENTALS & PAYMENTS',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const AdminRentalsPage(),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: midnightBlue,
+                          padding: const EdgeInsets.symmetric(vertical: 18),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 30),
 
                     // Dashboard cards grid
                     GridView.count(
-                      shrinkWrap: true, // important: allows grid inside scrollview
-                      physics: NeverScrollableScrollPhysics(), // scroll handled by parent
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
                       crossAxisCount: 2,
                       crossAxisSpacing: 16,
                       mainAxisSpacing: 16,
-                      children: [
+                      children: const [
                         DashboardSummaryCard(
                           title: 'Total Cars',
                           value: '10',
@@ -104,33 +135,27 @@ class _AdminDashboardState extends State<AdminDashboard> {
                       ],
                     ),
 
-                    SizedBox(height: 20),
+                    const SizedBox(height: 30),
                   ],
                 ),
               ),
-
             ),
           ),
 
-          // Sidebar overlay
+          // Sidebar
           AnimatedPositioned(
-            duration: Duration(milliseconds: 300),
+            duration: const Duration(milliseconds: 300),
             top: 0,
             bottom: 0,
             left: isSidebarOpen ? 0 : -sidebarWidth,
-            child: GestureDetector(
-              onTap: () {}, // prevents taps from closing accidentally
-              child: Container(
-                width: sidebarWidth,
-                decoration: BoxDecoration(
-                  color: midnightBlue.withOpacity(0.85),
-                ),
-                child: AdminSidebar(),
-              ),
+            child: Container(
+              width: sidebarWidth,
+              color: midnightBlue.withOpacity(0.85),
+              child: AdminSidebar(),
             ),
           ),
 
-          // Dark overlay when sidebar is open
+          // Overlay
           if (isSidebarOpen)
             Positioned.fill(
               child: GestureDetector(
