@@ -24,7 +24,8 @@ def mark_notification_as_read(request, notification_id):
     try:
         recipient = NotificationRecipient.objects.get(
             NotificationID__NotificationID=notification_id,
-            UserID=request.user
+            UserID=request.user,
+            Channel = 'in_app'
         )
         if recipient.Status != 'read':
             recipient.Status = 'read'

@@ -1,41 +1,33 @@
+# payments/models.py
 from django.db import models
-from django.conf import settings
+from accounts.models import User
 from rentals.models import Rental
 
-
 class Payment(models.Model):
-    STATUS_CHOICES = [
+    PAYMENT_METHODS = [
+        ('WISH', 'WISH'),
+        ('OMT', 'OMT'),
+        ('CASH', 'CASH'),
+    ]
+
+    PAYMENT_STATUS = [
         ('pending', 'Pending'),
         ('completed', 'Completed'),
         ('failed', 'Failed'),
     ]
 
-    METHOD_CHOICES = [
-        ('card', 'Card'),
-        ('cash', 'Cash'),
-    ]
-
-    PaymentID = models.AutoField(primary_key=True)
-    UserID = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        db_column='UserID'
-    )
-    RentalID = models.ForeignKey(
-        Rental,
-        on_delete=models.CASCADE,
-        db_column='RentalID'
-    )
-    Amount = models.DecimalField(max_digits=10, decimal_places=2)
-    PaymentDate = models.DateTimeField(auto_now_add=True)
-    Method = models.CharField(max_length=50, choices=METHOD_CHOICES)
-    Status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default='pending'
-    )
-    TransactionRef = models.CharField(max_length=100, null=True, blank=True)
+    paymentid = models.AutoField(db_column='PaymentID', primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, db_column='UserID')
+    rental = models.ForeignKey(Rental, on_delete=models.CASCADE, db_column='RentalID')
+    amount = models.DecimalField(max_digits=10, decimal_places=2, db_column='Amount')
+    paymentdate = models.DateTimeField(auto_now_add=True, db_column='PaymentDate')
+    method = models.CharField(max_length=10, choices=PAYMENT_METHODS, db_column='Method')
+    status = models.CharField(max_length=20, choices=PAYMENT_STATUS, default='pending', db_column='Status')
+    transactionref = models.CharField(max_length=100, blank=True, null=True, db_column='TransactionRef')
 
     class Meta:
-        managed=False
+        managed = False  # Table already exists
         db_table = 'Payment'
+
+    def __str__(self):
+        return f"Payment #{self.paymentid} - {self.status} - {self.amount}"

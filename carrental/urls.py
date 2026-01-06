@@ -41,7 +41,8 @@ urlpatterns = [
     path('api/', include('system_settings.urls')),
     path('api/', include('notifications.urls')),
     path('api/', include('dashboard.urls')),
-
+    path('api/returns/', include('returns.urls')),
+    path('api/documents/', include('user_documents.urls')),
 ]
 
 # allows Django to serve uploaded images during development

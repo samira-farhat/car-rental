@@ -37,11 +37,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'accounts.apps.AccountsConfig',
     'rest_framework',
     'corsheaders',
     'system_settings',
-    'accounts',
-    'cars',
+    'cars.apps.CarsConfig',
     'wishlist',
     'reviews',
     'damages',
@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'payments',
     'reports',
     'notifications',
+    'returns'
 ]
 
 MIDDLEWARE = [

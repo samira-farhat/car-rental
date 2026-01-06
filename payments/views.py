@@ -1,81 +1,142 @@
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+# payments/views.py
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status, permissions
+from .models import Payment
+from .serializers import PaymentSerializer, CreatePaymentSerializer
+from rentals.models import Rental
+from django.shortcuts import get_object_or_404
+
+class CreatePaymentView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        serializer = CreatePaymentSerializer(data=request.data)
+        if serializer.is_valid():
+            payment = serializer.save()
+            # Update rental status
+            rental = payment.rental
+            rental.status = 'pending_payment'  # just in case
+            rental.save()
+            return Response(PaymentSerializer(payment).data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ApprovePaymentView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    def post(self, request, payment_id):
+        payment = get_object_or_404(Payment, paymentid=payment_id)
+
+        if payment.status == 'completed':
+            return Response({'error': 'Payment already completed'}, status=400)
+
+        # Approve payment
+        payment.status = 'completed'
+        payment.save()
+
+        # Update rental
+        rental = payment.rental
+        rental.status = 'active'
+        rental.save()
+
+        # Update reservation
+        reservation = rental.reservation
+        if reservation:
+            reservation.status = 'completed'
+            reservation.save()
+
+        # Optionally, free car later when rental ends
+        # car = rental.car
+        # car.availabilitystatus = 'rented' # already set on reservation approval
+
+        return Response({'message': 'Payment approved, rental activated, reservation completed'}, status=200)
+
+class MyPaymentsView(APIView):
+    """
+    Customer can see their payments
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        payments = Payment.objects.filter(user=request.user)
+        serializer = PaymentSerializer(payments, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class PendingPaymentsView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    def get(self, request):
+        payments = Payment.objects.filter(status='pending')
+        serializer = PaymentSerializer(payments, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class RejectPaymentView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    def post(self, request, payment_id):
+        payment = get_object_or_404(Payment, paymentid=payment_id)
+
+        if payment.status != 'pending':
+            return Response({'error': 'Only pending payments can be rejected'}, status=status.HTTP_400_BAD_REQUEST)
+
+        payment.status = 'failed'
+        payment.save()
+
+        # Optionally update rental
+        rental = payment.rental
+        rental.status = 'cancelled'
+        rental.save()
+        
+        reservation = payment.rental.reservationid
+        reservation.status = 'completed'  # mark reservation as completed
+        reservation.save()
+        
+        car = rental.car
+        car.availabilitystatus = "available"  # assuming your Car model has this field
+        car.save()
+        return Response({'message': 'Payment rejected and rental updated'}, status=status.HTTP_200_OK)
+
+class ApprovedPaymentsView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    def get(self, request):
+        payments = Payment.objects.filter(status='completed')
+        serializer = PaymentSerializer(payments, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class RejectedPaymentsView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    def get(self, request):
+        payments = Payment.objects.filter(status='failed')
+        serializer = PaymentSerializer(payments, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from django.utils import timezone
-import uuid
+from .models import Payment, Rental
+from .serializers import PaymentSerializer
+from rentals.serializers import RentalSerializer
 
-from .models import Payment
-from rentals.models import Rental
-from notifications.services.notification_service import send_notification
-from django.contrib.auth import get_user_model
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def make_payment(request):
-    user = request.user
-
-    rental_id = request.data.get('rental_id')
-    payment_method = request.data.get('payment_method')
-    amount = request.data.get('amount')
-
-    # 1️⃣ Validate rental
-    try:
-        rental = Rental.objects.get(RentalID=rental_id, UserID=user)
-    except Rental.DoesNotExist:
-        return Response(
-            {"error": "Rental not found"},
-            status=status.HTTP_404_NOT_FOUND
-        )
-
-    if rental.Status != 'pending_payment':
-        return Response(
-            {"error": "Payment already processed"},
-            status=status.HTTP_400_BAD_REQUEST
-        )
-
-    if float(amount) != float(rental.TotalAmount):
-        return Response(
-            {"error": "Invalid payment amount"},
-            status=status.HTTP_400_BAD_REQUEST
-        )
-
-    # 2️⃣ Create payment record
-    payment = Payment.objects.create(
-        UserID=user,
-        RentalID=rental,
-        Amount=amount,
-        Method=payment_method,
-        Status='pending',
-        PaymentDate=timezone.now()
-    )
-
-    # 3️⃣ Process payment (simulated)
-    if payment_method == 'card':
-        payment.Status = 'completed'
-        rental.Status = 'active'
-    elif payment_method == 'cash':
-        payment.Status = 'pending'
-        rental.Status = 'pending_payment'
-    else:
-        payment.Status = 'failed'
-
-    payment.TransactionRef = f"PAY-{uuid.uuid4().hex[:10].upper()}"
-
-    payment.save()
-    User = get_user_model()
-    admins = User.objects.filter(role__in=['admin','manager'])
-    message = f"{payment.user.first_name} {payment.user.last_name} completed a payment of ${payment.amount}."
-    send_notification(
-            admins,
-            message=message,
-            notification_type='payment',
-            channels=('in_app', 'email')
-        )
-    rental.save()
-    
-    return Response({
-        "message": "Payment processed successfully",
-        "payment_status": payment.Status,
-        "transaction_ref": payment.TransactionRef
-    })
+class PaymentByRentalView(APIView):
+    def get(self, request, rental_id):
+        try:
+            payment = Payment.objects.filter(rental_id=rental_id).first()
+            if payment:
+                serializer = PaymentSerializer(payment)
+                return Response({
+                    "payment_exists": True,
+                    "payment": serializer.data
+                })
+            else:
+                rental = Rental.objects.get(rentalid=rental_id)
+                serializer = RentalSerializer(rental)
+                return Response({
+                    "payment_exists": False,
+                    "rental": serializer.data
+                })
+        except Rental.DoesNotExist:
+            return Response({"error": "Rental not found"}, status=status.HTTP_404_NOT_FOUND)

@@ -6,10 +6,16 @@ class RentalSerializer(serializers.ModelSerializer):
     car_id = serializers.IntegerField(source='car.carid', read_only=True)
     car_name = serializers.SerializerMethodField()
     car_image = serializers.SerializerMethodField()
+    user_name = serializers.SerializerMethodField()
+    user_email = serializers.SerializerMethodField()
 
     class Meta:
         model = Rental
-        fields = ['rentalid', 'car_id', 'car_name', 'car_image', 'startdate', 'enddate', 'status']
+        fields = [
+            'rentalid', 'car_id', 'car_name', 'car_image',
+            'startdate', 'enddate', 'duration', 'totalamount',
+            'status', 'user_name', 'user_email'
+        ]
 
     def get_car_name(self, obj):
         return f"{obj.car.brand} {obj.car.model} {obj.car.year}"
@@ -18,6 +24,12 @@ class RentalSerializer(serializers.ModelSerializer):
         if obj.car.image:
             return obj.car.image.url
         return None
+
+    def get_user_name(self, obj):
+        return f"{obj.user.first_name} {obj.user.last_name}"
+
+    def get_user_email(self, obj):
+        return obj.user.email
 
 
 

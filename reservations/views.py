@@ -277,7 +277,7 @@ class CreateReservationView(APIView):
             startdate__lte=enddate,
             enddate__gte=startdate
         ).exclude(
-            status__in=['rejected', 'cancelled']
+            status__in=['rejected', 'cancelled', 'completed']
         ).exists()
 
         if conflict:

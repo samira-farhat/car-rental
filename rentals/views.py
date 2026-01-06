@@ -27,3 +27,37 @@ class RentalDetailView(APIView):
         )
         serializer = RentalDetailSerializer(rental)
         return Response(serializer.data, status=200)
+
+# rentals/views.py
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from .models import Rental
+from .serializers import RentalDetailSerializer
+
+class RentalByReservationView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, reservation_id):
+        try:
+            rental = Rental.objects.select_related('car').get(reservation_id=reservation_id)
+        except Rental.DoesNotExist:
+            return Response({'error': 'Rental not found'}, status=404)
+
+        serializer = RentalDetailSerializer(rental)
+        return Response(serializer.data)
+
+class MyRentalsView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        qs = Rental.objects.filter(user=request.user)
+
+        # optional filter: ?status=active or ?status=completed etc.
+        st = request.query_params.get("status")
+        if st:
+            qs = qs.filter(status=st)
+
+        qs = qs.order_by("-createdat")  # newest first
+        serializer = RentalSerializer(qs, many=True)
+        return Response(serializer.data, status=200)

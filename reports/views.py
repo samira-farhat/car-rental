@@ -10,7 +10,7 @@ from django.db.models.functions import TruncMonth
 from payments.models import Payment
 from rentals.models import Rental
 from damages.models import Damage
-from cars.models import Car, Carcategory
+from cars.models import Car
 from reservations.models import Reservation
 
 
@@ -42,6 +42,7 @@ class GenerateReportView(APIView):
                 {"error": "Report type is required"},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
         if not start_date or not end_date:
             return Response(
                 {"error": "Start date and end date are required"},
@@ -70,13 +71,13 @@ class GenerateReportView(APIView):
             )
 
         # ==================================================
-        # FINANCIAL REPORT LOGIC
+        # FINANCIAL REPORT
         # ==================================================
         if report_type == "financial":
             total_income = Payment.objects.filter(
-                Status='completed',
-                PaymentDate__date__range=(start_date, end_date)
-            ).aggregate(total=Sum('Amount'))['total'] or 0
+                status='completed',
+                paymentdate__date__range=(start_date, end_date)
+            ).aggregate(total=Sum('amount'))['total'] or 0
 
             total_rentals = Rental.objects.filter(
                 createdat__date__range=(start_date, end_date)
@@ -87,16 +88,19 @@ class GenerateReportView(APIView):
             ).count()
 
             monthly_income_qs = Payment.objects.filter(
-                Status='completed',
-                PaymentDate__date__range=(start_date, end_date)
+                status='completed',
+                paymentdate__date__range=(start_date, end_date)
             ).annotate(
-                month=TruncMonth('PaymentDate')
+                month=TruncMonth('paymentdate')
             ).values('month').annotate(
-                total=Sum('Amount')
+                total=Sum('amount')
             ).order_by('month')
 
             monthly_income = [
-                {"month": item["month"].strftime("%b %Y"), "total": float(item["total"])}
+                {
+                    "month": item["month"].strftime("%b %Y"),
+                    "total": float(item["total"])
+                }
                 for item in monthly_income_qs
             ]
 
@@ -108,42 +112,79 @@ class GenerateReportView(APIView):
                     "total_rentals": total_rentals,
                     "open_claims": open_claims
                 },
-                "charts": {"monthly_income": monthly_income},
+                "charts": {
+                    "monthly_income": monthly_income
+                },
                 "export_format": export_format
             }, status=status.HTTP_200_OK)
 
         # ==================================================
-        # OPERATIONAL REPORT LOGIC
+        # OPERATIONAL REPORT
         # ==================================================
         if report_type == "operational":
-            car_status_qs = Car.objects.values('availabilitystatus').annotate(count=Count('carid'))
-            car_status_counts = {item['availabilitystatus']: item['count'] for item in car_status_qs}
+            car_status_qs = Car.objects.values('availabilitystatus').annotate(
+                count=Count('carid')
+            )
+            car_status_counts = {
+                item['availabilitystatus']: item['count']
+                for item in car_status_qs
+            }
+
             total_cars = Car.objects.count()
 
             rentals_qs = Rental.objects.filter(
                 startdate__gte=start_date,
                 enddate__lte=end_date
             )
+
             total_rentals = rentals_qs.count()
-            avg_rental_duration = rentals_qs.aggregate(avg_duration=Avg('duration'))['avg_duration'] or 0
+            avg_rental_duration = rentals_qs.aggregate(
+                avg_duration=Avg('duration')
+            )['avg_duration'] or 0
 
             rentals_by_category_qs = rentals_qs.values(
                 category_name=F('car__categoryid__categoryname')
-            ).annotate(count=Count('rentalid')).order_by('category_name')
-            rentals_by_category = {item['category_name']: item['count'] for item in rentals_by_category_qs}
+            ).annotate(
+                count=Count('rentalid')
+            ).order_by('category_name')
+
+            rentals_by_category = {
+                item['category_name']: item['count']
+                for item in rentals_by_category_qs
+            }
 
             reservations_qs = Reservation.objects.filter(
                 createdat__date__range=(start_date, end_date)
             )
-            reservation_status_qs = reservations_qs.values('status').annotate(count=Count('reservationid'))
-            reservation_status_counts = {item['status']: item['count'] for item in reservation_status_qs}
+
+            reservation_status_qs = reservations_qs.values('status').annotate(
+                count=Count('reservationid')
+            )
+
+            reservation_status_counts = {
+                item['status']: item['count']
+                for item in reservation_status_qs
+            }
+
             total_reservations = reservations_qs.count()
 
-            damages_qs = Damage.objects.filter(reportdate__range=(start_date, end_date))
-            damage_status_qs = damages_qs.values('status').annotate(count=Count('damageid'))
-            damage_status_counts = {item['status']: item['count'] for item in damage_status_qs}
+            damages_qs = Damage.objects.filter(
+                reportdate__range=(start_date, end_date)
+            )
+
+            damage_status_qs = damages_qs.values('status').annotate(
+                count=Count('damageid')
+            )
+
+            damage_status_counts = {
+                item['status']: item['count']
+                for item in damage_status_qs
+            }
+
             total_damages = damages_qs.count()
-            total_repair_cost = damages_qs.aggregate(total=Sum('repaircost'))['total'] or 0
+            total_repair_cost = damages_qs.aggregate(
+                total=Sum('repaircost')
+            )['total'] or 0
 
             return Response({
                 "report_type": "operational",
@@ -164,7 +205,7 @@ class GenerateReportView(APIView):
             }, status=status.HTTP_200_OK)
 
         # ==================================================
-        # RENTAL HISTORY REPORT LOGIC
+        # RENTAL HISTORY REPORT
         # ==================================================
         if report_type == "rental_history":
             rentals_qs = Rental.objects.filter(
@@ -172,16 +213,18 @@ class GenerateReportView(APIView):
                 enddate__lte=end_date
             )
 
-            # Total rentals
             total_rentals = rentals_qs.count()
 
-            # Total revenue from completed rentals
-            total_revenue = rentals_qs.filter(status='completed').aggregate(total=Sum('totalamount'))['total'] or 0
+            total_revenue = rentals_qs.filter(
+                status='completed'
+            ).aggregate(
+                total=Sum('totalamount')
+            )['total'] or 0
 
-            # Average rental duration
-            avg_duration = rentals_qs.aggregate(avg_duration=Avg('duration'))['avg_duration'] or 0
+            avg_duration = rentals_qs.aggregate(
+                avg_duration=Avg('duration')
+            )['avg_duration'] or 0
 
-            # Rentals per month (for charts)
             monthly_rentals_qs = rentals_qs.annotate(
                 month=TruncMonth('startdate')
             ).values('month').annotate(
@@ -189,16 +232,23 @@ class GenerateReportView(APIView):
             ).order_by('month')
 
             monthly_rentals = [
-                {"month": item['month'].strftime("%b %Y"), "count": item['count']}
+                {
+                    "month": item['month'].strftime("%b %Y"),
+                    "count": item['count']
+                }
                 for item in monthly_rentals_qs
             ]
 
-            # Rentals by car category
             rentals_by_category_qs = rentals_qs.values(
                 category_name=F('car__categoryid__categoryname')
-            ).annotate(count=Count('rentalid')).order_by('category_name')
+            ).annotate(
+                count=Count('rentalid')
+            ).order_by('category_name')
 
-            rentals_by_category = {item['category_name']: item['count'] for item in rentals_by_category_qs}
+            rentals_by_category = {
+                item['category_name']: item['count']
+                for item in rentals_by_category_qs
+            }
 
             return Response({
                 "report_type": "rental_history",
