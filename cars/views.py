@@ -11,6 +11,8 @@ from django.db import transaction
 from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Carcategory
 from .serializers import CarCategorySerializer
+from notifications.services.notification_service import send_notification
+from django.contrib.auth import get_user_model
 
 class CarCategoryListView(APIView):
     permission_classes = [AllowAny]
@@ -49,11 +51,25 @@ class AdminCarManagementView(APIView):
     def post(self, request):
         """
         ADD a new car with image upload.
+        Also sends a notification to all customers.
         """
         serializer = AdminCarWriteSerializer(data=request.data)
 
         if serializer.is_valid():
             car = serializer.save()
+
+            # -------------------------------
+            # SEND NOTIFICATION TO CUSTOMERS
+            # -------------------------------
+            User = get_user_model()
+            customers = User.objects.filter(role='customer')  # all customers
+            message = f"A new car {car.brand} {car.model} is now available!"
+            send_notification(
+            customers,
+            message=message,
+            notification_type='general',
+            channels=('in_app', 'email')
+        )
 
             return Response(
                 {

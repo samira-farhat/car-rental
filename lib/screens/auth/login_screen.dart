@@ -6,21 +6,18 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../manager_screens/admin_dashboard.dart';
 
-
 class LoginScreen extends StatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final storage = const FlutterSecureStorage();
-  // color to use
   final Color midnightBlue = Color(0xFF004760);
 
-  bool _obscurePassword= true;
+  bool _obscurePassword = true;
 
   Future<void> loginUser() async {
     final String email = emailController.text.trim();
@@ -28,16 +25,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Please enter email and password"))
+        const SnackBar(content: Text("Please enter email and password")),
       );
       return;
     }
-    //Samira
-    // final url = Uri.parse('http://localhost:8000/api/accounts/login/');
-    final url = Uri.parse(
-      //Mohammad
-        'http://localhost:8000/api/accounts/login/'
-    );
+
+    final url = Uri.parse('http://localhost:8000/api/accounts/login/');
 
     try {
       final response = await http.post(
@@ -50,9 +43,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (response.statusCode == 200) {
         final token = data['access'];
-        final role = data['role']; // 👈 IMPORTANT
+        final role = data['role'];
 
-        // Save token & role securely
         await storage.write(key: 'access', value: token);
         await storage.write(key: 'role', value: role);
 
@@ -60,16 +52,12 @@ class _LoginScreenState extends State<LoginScreen> {
           const SnackBar(content: Text("Login successful!")),
         );
 
-        // 🔀 ROLE-BASED NAVIGATION
         if (role == 'admin') {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(
-              builder: (_) => AdminGridDashboard(),
-            ),
+            MaterialPageRoute(builder: (_) => AdminGridDashboard()),
           );
         } else {
-          // customer
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -77,21 +65,16 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           );
         }
-      }
-
-      else {
+      } else {
         if (data['error'] == 'Please verify your account first') {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Please verify your email first')),
+            const SnackBar(content: Text('Please verify your email first')),
           );
 
           Navigator.pushReplacementNamed(
             context,
             '/verify',
-            arguments: {
-              'email': email,
-              'password': password, // <-- include password
-            },
+            arguments: {'email': email, 'password': password},
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -101,171 +84,187 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error connecting to server"))
+        const SnackBar(content: Text("Error connecting to server")),
       );
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      body: Expanded(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.all(0),
-            child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.all(0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Top Image
+              Semantics(
+                label: 'Top login image',
+                image: true,
+                child: Image.asset(
+                  'assets/images/top_login.jpeg',
+                  width: double.infinity,
+                  height: 200,
+                  fit: BoxFit.cover,
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              // Email Input
+              Padding(
+                padding: const EdgeInsets.fromLTRB(40.0, 0, 40.0, 0),
+                child: Semantics(
+                  label: 'Email input field',
+                  hint: 'Enter your email address. Required.',
+                  textField: true,
+                  focusable: true,
+                  child: TextField(
+                    controller: emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    autofocus: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Email',
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 15),
+
+              // Password Input
+              Padding(
+                padding: const EdgeInsets.fromLTRB(40.0, 0, 40.0, 0),
+                child: Semantics(
+                  label: 'Password input field',
+                  hint: 'Enter your password. Required.',
+                  textField: true,
+                  focusable: true,
+                  child: TextField(
+                    controller: passwordController,
+                    obscureText: _obscurePassword,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: const OutlineInputBorder(),
+                      suffixIcon: Semantics(
+                        button: true,
+                        label: _obscurePassword ? 'Show password' : 'Hide password',
+                        hint: 'Toggles password visibility',
+                        child: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                          icon: Icon(_obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              // Forgot Password
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-
-                  Image.asset(
-                    'assets/images/top_login.jpeg',
-                    width: double.infinity,
-                    height: 200,
-                    fit: BoxFit.contain,
-                  ),
-
-                  SizedBox(height: 10,),
-
                   Padding(
-                    padding: EdgeInsets.fromLTRB(40.0, 0, 40.0, 0),
+                    padding: const EdgeInsets.fromLTRB(40.0, 0, 40.0, 0),
                     child: Semantics(
-                      label: 'Email input field',
-                      hint: 'Enter your email address',
-                      textField: true,
-                      child: TextField(
-                        controller: emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: InputDecoration(
-                          labelText: 'Email',
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  SizedBox(height: 15),
-
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(40.0, 0, 40.0, 0),
-                    child: Semantics(
-                      label: 'Password input field',
-                      hint: 'Enter your password',
-                      textField: true,
-                      child: TextField(
-                        controller: passwordController,
-                        obscureText: _obscurePassword,
-                        decoration: InputDecoration(
-                          labelText: 'Password',
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(),
-                          suffixIcon: IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  _obscurePassword = !_obscurePassword;
-                                });
-                              },
-                              icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                      label: 'Forgot password button',
+                      hint: 'Tap to reset your password',
+                      button: true,
+                      focusable: true,
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/forgot_password');
+                        },
+                        child: Text(
+                          'Forgot Password?',
+                          style: TextStyle(
+                            color: midnightBlue,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
                     ),
                   ),
-
-                  SizedBox(height: 10),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(40.0, 0, 40.0, 0),
-                        child: Semantics(
-                          label: 'Forgot password button',
-                          hint: 'Tap to reset your password',
-                          button: true,
-                          child: TextButton(
-                            onPressed: () {
-                              Navigator.pushNamed(context, '/forgot_password');
-                            },
-                            child: Text(
-                              'Forgot Password?',
-                              style: TextStyle(
-                                color: midnightBlue,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: 40),
-
-                  Semantics(
-                    label: 'Login button',
-                    hint: 'Tap to log into your account',
-                    button: true,
-                    child: ElevatedButton(
-                      onPressed: loginUser, // calling the login function
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: midnightBlue,
-                        padding: EdgeInsets.symmetric(horizontal: 100, vertical: 15),
-                      ),
-                      child: Text(
-                        'LOGIN',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  SizedBox(height: 6),
-
-                  Semantics(
-                    label: 'Register button',
-                    hint: 'Tap to create a new account',
-                    button: true,
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/register');
-                      },
-                      child: Text(
-                        'Don\'t have an account? Register',
-                        style: TextStyle(
-                          color: midnightBlue,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  SizedBox(height: 30),
-
-                  Image.asset(
-                    'assets/images/bottom_login.jpeg',
-                    fit: BoxFit.fitWidth,
-                  )
-
                 ],
               ),
-            ),
+
+              const SizedBox(height: 40),
+
+              // Login Button
+              Semantics(
+                label: 'Login button',
+                hint: 'Tap to log into your account',
+                button: true,
+                focusable: true,
+                child: ElevatedButton(
+                  onPressed: loginUser,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: midnightBlue,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 100, vertical: 15),
+                  ),
+                  child: const Text(
+                    'LOGIN',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 6),
+
+              // Register Button
+              Semantics(
+                label: 'Register button',
+                hint: 'Tap to create a new account',
+                button: true,
+                focusable: true,
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/register');
+                  },
+                  child: Text(
+                    'Don\'t have an account? Register',
+                    style: TextStyle(
+                      color: midnightBlue,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 30),
+
+              // Bottom Image
+              Semantics(
+                label: 'Bottom login image',
+                image: true,
+                child: Image.asset(
+                  'assets/images/bottom_login.jpeg',
+                  fit: BoxFit.fitWidth,
+                ),
+              ),
+            ],
           ),
-
-
+        ),
       ),
-
-      /*bottomNavigationBar: Image.asset(
-      'assets/images/bottom_login.jpeg',
-      fit: BoxFit.fitWidth,
-    )*/
-
     );
   }
 }

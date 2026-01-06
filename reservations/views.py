@@ -1,29 +1,34 @@
 # reservations/views.py
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser
 from rest_framework import status
-
 from django.db import transaction
 from django.db.models import Q
-
 from .models import Reservation
 from rentals.models import Rental
 from cars.models import Car
-
 from .serializers import (
     AdminReservationListSerializer,
     AdminReservationDetailSerializer
 )
-
 from rest_framework.permissions import IsAuthenticated
 from .serializers import CreateReservationSerializer
 
 from rest_framework.permissions import IsAuthenticated
 from rentals.models import Rental
 from .serializers import CustomerReservationListSerializer
+from notifications.services.notification_service import _send_email_notification, send_notification
+from django.contrib.auth import get_user_model
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from django.db.models import Q
+
+from .models import Reservation
+from .serializers import CreateReservationSerializer
 
 class AdminReservationListView(APIView):
     """
@@ -153,6 +158,15 @@ class ApproveReservationView(APIView):
         reservation.approvedby = request.user
         reservation.save()
 
+        # Notify the reservation owner
+        message = f"Your reservation for {reservation.car.brand} {reservation.car.model} has been approved."
+        send_notification(
+            users=[reservation.user],
+            message=message,
+            notification_type='reservation',
+            channels=('in_app', 'email')
+        )
+
         # Create rental record
         rental = Rental.objects.create(
             reservation=reservation,
@@ -215,22 +229,20 @@ class RejectReservationView(APIView):
         reservation.rejectionreason = reason
         reservation.approvedby = request.user
         reservation.save()
-
+        # Notify the reservation owner
+        message = f"Your reservation for {reservation.car.brand} {reservation.car.model} was rejected. Reason: {reason}"
+        send_notification(
+            users=[reservation.user],
+            message=message,
+            notification_type='reservation',
+            channels=('in_app', 'email')
+        )
         return Response(
             {'message': 'Reservation rejected successfully'},
             status=status.HTTP_200_OK
         )
 
 
-
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
-from django.db.models import Q
-
-from .models import Reservation
-from .serializers import CreateReservationSerializer
 
 
 # customer endpoint
@@ -279,7 +291,11 @@ class CreateReservationView(APIView):
             user=request.user,
             status='pending'
         )
-
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        admins = User.objects.filter(role__in=['admin','manager'])
+        message = f"{reservation.user.first_name} {reservation.user.last_name} reserved {reservation.car.brand} {reservation.car.model}."
+        send_notification(admins, message, notification_type='reservation')
         return Response(
             {
                 'message': 'Reservation created successfully',
@@ -363,7 +379,15 @@ class CancelReservationView(APIView):
         # Cancel reservation
         reservation.status = 'cancelled'
         reservation.save()
-
+        User = get_user_model()
+        admins = User.objects.filter(role__in=['admin','manager'])
+        message = f"{reservation.user.first_name} {reservation.user.last_name} cancelled the reservation for {reservation.car.brand} {reservation.car.model}."
+        send_notification(
+            admins,
+            message=message,
+            notification_type='reservation',
+            channels=('in_app', 'email')
+        )
         # Cancel rental if exists
         rental = Rental.objects.filter(reservation=reservation).first()
         if rental:

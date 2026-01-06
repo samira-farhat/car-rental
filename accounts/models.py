@@ -5,6 +5,9 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.db import models
 from django.utils import timezone
 from django.core.validators import FileExtensionValidator
+import random
+from django.utils import timezone
+from datetime import timedelta
 
 # custom user manager
 # handles creating normal users and superusers
@@ -31,6 +34,18 @@ class UserManager(BaseUserManager):
 # it inherits from AbstractBaseUser for password management and from PermissionMixin for groups & permissions
 class User(AbstractBaseUser, PermissionsMixin):
     # db User table fields that we need
+    is_verified = models.BooleanField(default=False)
+
+    verification_code = models.CharField(
+        max_length=6,
+        blank=True,
+        null=True
+    )
+
+    verification_code_created_at = models.DateTimeField(
+        blank=True,
+        null=True
+    )
     first_name = models.CharField(max_length=50)
     middle_name = models.CharField(max_length=50, blank=True, null=True)
     last_name = models.CharField(max_length=50)
@@ -72,22 +87,15 @@ class User(AbstractBaseUser, PermissionsMixin):
 # stores user uploaded documents such as drivers license
 # each document is linked to a user
 class Documentation(models.Model):
-    documentid = models.AutoField(
-        primary_key=True,
-        db_column='DocumentID'
-    )
-
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='documents',
-        db_column='UserID'
+        related_name='documents'
     )
 
     document_type = models.CharField(
         max_length=50,
-        default='Driver License',
-        db_column='DocumentType'
+        default='Driver License'
     )
 
     document_image = models.FileField(
@@ -96,22 +104,33 @@ class Documentation(models.Model):
             FileExtensionValidator(
                 allowed_extensions=['pdf', 'jpg', 'png', 'jpeg']
             )
-        ],
-        db_column='DocumentImage'
+        ]
     )
 
     status = models.CharField(
         max_length=20,
-        choices=[('pending', 'pending'), ('verified', 'verified'), ('rejected', 'rejected')],
-        default='pending',
-        db_column='Status'
+        choices=[
+            ('pending', 'pending'),
+            ('verified', 'verified'),
+            ('rejected', 'rejected')
+        ],
+        default='pending'
     )
 
-    uploaded_at = models.DateTimeField(
-        auto_now_add=True,
-        db_column='UploadedAt'
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.email} - {self.document_type}"
+
+class EmailVerificationCode(models.Model):
+    PURPOSE_CHOICES = (
+        ('verify', 'Verify Account'),
+        ('reset', 'Reset Password'),
     )
 
-    class Meta:
-        db_table = 'Documentation'
-        managed = False 
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    code = models.CharField(max_length=6)
+    purpose = models.CharField(max_length=10, choices=PURPOSE_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    is_used = models.BooleanField(default=False)

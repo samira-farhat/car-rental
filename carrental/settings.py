@@ -39,14 +39,18 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
+    'system_settings',
     'accounts',
     'cars',
     'wishlist',
     'reviews',
+    'damages',
     'rest_framework_simplejwt',
     'reservations',
     'rentals',
-    
+    'payments',
+    'reports',
+    'notifications',
 ]
 
 MIDDLEWARE = [
@@ -101,6 +105,7 @@ DATABASES = {
         'PORT': '3306', # default MySQL port
     }
 }
+
 
 # in rder to use the custom user model for authentication
 AUTH_USER_MODEL = 'accounts.User'
@@ -165,3 +170,16 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
 }
+
+# settings.py
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+EMAIL_HOST_USER = 'husseinmohamad651@gmail.com'
+EMAIL_HOST_PASSWORD = 'kuydayxuzunasgsp'
+
+DEFAULT_FROM_EMAIL = 'Drive With Khachab <husseinmohamad651@gmail.com>'
