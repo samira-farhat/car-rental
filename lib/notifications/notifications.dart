@@ -11,8 +11,11 @@ class UserNotificationsPage extends StatefulWidget {
 }
 
 class _UserNotificationsPageState extends State<UserNotificationsPage>
-    with TickerProviderStateMixin {
-  late AnimationController _listController;
+    with SingleTickerProviderStateMixin {
+
+  late AnimationController _fadeController;
+  late Animation<double> _fadeAnimation;
+
   List<UserNotification> notifications = [];
   bool isLoading = true;
 
@@ -20,9 +23,14 @@ class _UserNotificationsPageState extends State<UserNotificationsPage>
   void initState() {
     super.initState();
 
-    _listController = AnimationController(
+    _fadeController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 400),
+    );
+
+    _fadeAnimation = CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeOut,
     );
 
     fetchNotifications();
@@ -30,24 +38,28 @@ class _UserNotificationsPageState extends State<UserNotificationsPage>
 
   @override
   void dispose() {
-    _listController.dispose();
+    _fadeController.dispose();
     super.dispose();
   }
 
   // ------------------- Fetch Notifications -------------------
   Future<void> fetchNotifications() async {
     setState(() => isLoading = true);
+
     try {
       notifications = await NotificationService.fetchNotifications();
+      if (mounted) {
+        _fadeController.forward(); // animate ONCE
+      }
     } catch (e) {
       debugPrint("Error fetching notifications: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.toString())),
       );
     }
+
     if (mounted) {
       setState(() => isLoading = false);
-      _listController.forward(from: 0.0);
     }
   }
 
@@ -63,7 +75,7 @@ class _UserNotificationsPageState extends State<UserNotificationsPage>
     } catch (e) {
       debugPrint("Error marking notification as read: $e");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to mark notification as read")),
+        const SnackBar(content: Text("Failed to mark notification as read")),
       );
     }
   }
@@ -78,10 +90,11 @@ class _UserNotificationsPageState extends State<UserNotificationsPage>
           Expanded(
             child: isLoading
                 ? const Center(child: CircularProgressIndicator(strokeWidth: 2))
-                : _buildNotificationList(),
+                : FadeTransition(
+              opacity: _fadeAnimation,
+              child: _buildNotificationList(),
+            ),
           ),
-          const SizedBox(height: 20),
-          const AppLogo(size: 80), // replace with your logo widget
           const SizedBox(height: 20),
         ],
       ),
@@ -95,7 +108,9 @@ class _UserNotificationsPageState extends State<UserNotificationsPage>
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(30), bottomRight: Radius.circular(30)),
+          bottomLeft: Radius.circular(30),
+          bottomRight: Radius.circular(30),
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -126,10 +141,14 @@ class _UserNotificationsPageState extends State<UserNotificationsPage>
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: electricCyan,
+              color: deepMidnightBlue,
               borderRadius: BorderRadius.circular(14),
             ),
-            child: const Icon(Icons.notifications_outlined, color: Colors.white, size: 20),
+            child: const Icon(
+              Icons.notifications_outlined,
+              color: Colors.white,
+              size: 20,
+            ),
           )
         ],
       ),
@@ -146,22 +165,7 @@ class _UserNotificationsPageState extends State<UserNotificationsPage>
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       itemCount: notifications.length,
       itemBuilder: (context, index) {
-        final n = notifications[index];
-        return AnimatedBuilder(
-          animation: _listController,
-          builder: (context, child) {
-            final slide =
-            Curves.easeOutCubic.transform((_listController.value - (index * 0.1)).clamp(0.0, 1.0));
-            return Opacity(
-              opacity: slide,
-              child: Transform.translate(
-                offset: Offset(0, 30 * (1 - slide)),
-                child: child,
-              ),
-            );
-          },
-          child: _buildNotificationCard(n),
-        );
+        return _buildNotificationCard(notifications[index]);
       },
     );
   }
@@ -192,7 +196,9 @@ class _UserNotificationsPageState extends State<UserNotificationsPage>
                 n.status == 'unread'
                     ? Icons.notifications_active
                     : Icons.notifications_none,
-                color: n.status == 'unread' ? electricCyan : Colors.grey,
+                color: n.status == 'unread'
+                    ? electricCyan
+                    : Colors.grey,
                 size: 28,
               ),
               const SizedBox(width: 16),
@@ -211,7 +217,10 @@ class _UserNotificationsPageState extends State<UserNotificationsPage>
                     const SizedBox(height: 6),
                     Text(
                       n.sentAt,
-                      style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                      style: TextStyle(
+                        color: Colors.grey.shade500,
+                        fontSize: 12,
+                      ),
                     ),
                   ],
                 ),
@@ -223,7 +232,11 @@ class _UserNotificationsPageState extends State<UserNotificationsPage>
                     color: electricCyan,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.check, color: Colors.white, size: 14),
+                  child: const Icon(
+                    Icons.check,
+                    color: Colors.white,
+                    size: 14,
+                  ),
                 ),
             ],
           ),

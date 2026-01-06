@@ -121,7 +121,7 @@ class _AdminCarsPageState extends State<AdminCarsPage> with TickerProviderStateM
             },
             icon: Container(
               padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(color: electricCyan, borderRadius: BorderRadius.circular(12)),
+              decoration: BoxDecoration(color: deepMidnightBlue, borderRadius: BorderRadius.circular(12)),
               child: const Icon(Icons.add, color: Colors.white),
             ),
           )
@@ -342,18 +342,22 @@ class _AddEditCarPageState extends State<AddEditCarPage> {
 
               // --- AVAILABILITY STATUS FIELD ---
               DropdownButtonFormField<String>(
+                dropdownColor: Colors.white,
                 value: availabilityStatus,
                 decoration: _dropdownDecoration("Availability", Icons.info_outline),
                 items: availabilityOptions.map((e) => DropdownMenuItem(value: e, child: Text(e.toUpperCase()))).toList(),
                 onChanged: (v) => setState(() => availabilityStatus = v!),
+                style: const TextStyle(color: Colors.black),
               ),
               const SizedBox(height: 16),
 
               DropdownButtonFormField<int>(
+                dropdownColor: Colors.white,
                 value: selectedCategoryId,
                 decoration: _dropdownDecoration("Category", Icons.category_outlined),
                 items: categories.map<DropdownMenuItem<int>>((c) => DropdownMenuItem<int>(value: c["categoryid"], child: Text(c["categoryname"]))).toList(),
                 onChanged: (v) => setState(() => selectedCategoryId = v),
+                style: const TextStyle(color: Colors.black),
               ),
               const SizedBox(height: 32),
               SizedBox(width: double.infinity, height: 56, child: ElevatedButton(onPressed: confirmSubmit, style: ElevatedButton.styleFrom(backgroundColor: Colors.black, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))), child: const Text("COMMIT CHANGES", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)))),

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:car_management_frontend/screens/customer_screens/payment_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -186,9 +188,46 @@ class ReservationCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/payment');
+                      onPressed: () async {
+                        final storage = FlutterSecureStorage();
+                        final token = await storage.read(key: 'access');
+
+                        final response = await http.get(
+                          Uri.parse('http://localhost:8000/api/rentals/by_reservation/${reservation['reservationid']}/'),
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer $token',
+                          },
+                        );
+
+                        if (response.statusCode == 200) {
+                          final rental = jsonDecode(response.body);
+
+                          double totalAmount = double.tryParse(rental['totalamount'].toString()) ?? 0.0;
+
+                          // Split car_name into brand/model if needed
+                          final carParts = rental['car_name'].split(' ');
+                          final brand = carParts[0];
+                          final model = carParts.length > 1 ? carParts[1] : '';
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => PaymentScreen(
+                                rentalId: rental['rentalid'],
+
+                              ),
+                            ),
+                          ).then((_) => onRefresh());
+                        } else {
+                          final data = jsonDecode(response.body);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(data['error'] ?? 'Failed to fetch rental details')),
+                          );
+                        }
                       },
+
+
                       child: Text('Rent Now'),
                     ),
                   ),
