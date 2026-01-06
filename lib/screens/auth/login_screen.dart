@@ -116,21 +116,16 @@ class _LoginScreenState extends State<LoginScreen> {
               // Email Input
               Padding(
                 padding: const EdgeInsets.fromLTRB(40.0, 0, 40.0, 0),
-                child: Semantics(
-                  label: 'Email input field',
-                  hint: 'Enter your email address. Required.',
-                  textField: true,
-                  focusable: true,
-                  child: TextField(
-                    controller: emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    autofocus: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(),
-                    ),
+                child: TextField(
+                  controller: emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  autofocus: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    hintText: "Enter your email address",
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(),
                   ),
                 ),
               ),
@@ -140,34 +135,26 @@ class _LoginScreenState extends State<LoginScreen> {
               // Password Input
               Padding(
                 padding: const EdgeInsets.fromLTRB(40.0, 0, 40.0, 0),
-                child: Semantics(
-                  label: 'Password input field',
-                  hint: 'Enter your password. Required.',
-                  textField: true,
-                  focusable: true,
-                  child: TextField(
-                    controller: passwordController,
-                    obscureText: _obscurePassword,
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: const OutlineInputBorder(),
-                      suffixIcon: Semantics(
-                        button: true,
-                        label: _obscurePassword ? 'Show password' : 'Hide password',
-                        hint: 'Toggles password visibility',
-                        child: IconButton(
-                          onPressed: () {
-                            setState(() {
-                              _obscurePassword = !_obscurePassword;
-                            });
-                          },
-                          icon: Icon(_obscurePassword
-                              ? Icons.visibility_off
-                              : Icons.visibility),
-                        ),
+                child: TextField(
+                  controller: passwordController,
+                  obscureText: _obscurePassword,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    hintText: "Enter your password",
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                      icon: Icon(_obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility
                       ),
+                      tooltip: _obscurePassword ? 'Show password' : 'Hide password',
                     ),
                   ),
                 ),
