@@ -101,6 +101,9 @@ class _AdminSystemSettingsPageState extends State<AdminSystemSettingsPage>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7FA),
+      appBar: AppBar(
+        automaticallyImplyLeading: true,
+      ),
       body: Column(
         children: [
           _buildTopBar(),
@@ -164,7 +167,7 @@ class _AdminSystemSettingsPageState extends State<AdminSystemSettingsPage>
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: electricCyan,
+              color: deepMidnightBlue,
               borderRadius: BorderRadius.circular(14),
             ),
             child: const Icon(Icons.settings_outlined, color: Colors.white, size: 20),
@@ -185,7 +188,7 @@ class _AdminSystemSettingsPageState extends State<AdminSystemSettingsPage>
       child: TabBar(
         controller: _tabController,
         indicator: BoxDecoration(
-          color: const Color(0xFF49C5E0),
+          color: deepMidnightBlue,
           borderRadius: BorderRadius.circular(12),
         ),
         labelColor: Colors.white,

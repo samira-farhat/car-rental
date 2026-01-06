@@ -101,7 +101,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql', # to use MySQL
         'NAME': 'CarRentalDB', # our database name
         'USER': 'root', # MySQL username
-        'PASSWORD': 'root', # MySQL password
+        'PASSWORD': 'Root', # MySQL password
         'HOST': 'localhost', # host
         'PORT': '3306', # default MySQL port
     }

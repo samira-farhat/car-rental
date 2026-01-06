@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:car_management_frontend/screens/customer_screens/wishlist_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
@@ -6,7 +7,6 @@ import '../../globals.dart';
 import '../../models/car_model.dart';
 import '../../widgets/car_card.dart';
 import 'car_details_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class BrowseScreen extends StatefulWidget {
   final bool isGuest;
@@ -21,7 +21,7 @@ class BrowseScreen extends StatefulWidget {
 }
 
 class _BrowseScreenState extends State<BrowseScreen> {
-  final Color midnightBlue = Color(0xFF004760);
+  final Color midnightBlue = const Color(0xFF004760);
 
   List<Car> cars = [];
   List<String> categories = ["All"];
@@ -34,7 +34,6 @@ class _BrowseScreenState extends State<BrowseScreen> {
     fetchCarsAndWishlist();
   }
 
-  // Fetch cars and wishlist sequentially
   Future<void> fetchCarsAndWishlist() async {
     setState(() {
       isLoading = true;
@@ -43,8 +42,6 @@ class _BrowseScreenState extends State<BrowseScreen> {
     final storage = const FlutterSecureStorage();
     final token = await storage.read(key: 'access');
 
-
-    // Clear wishlist if guest
     if (widget.isGuest) {
       wishlistedCarsNotifier.value = [];
     }
@@ -65,39 +62,26 @@ class _BrowseScreenState extends State<BrowseScreen> {
         List<Car> fetchedCars = data.map((e) => Car.fromJson(e)).toList();
         globalCars = fetchedCars;
 
-        // extract categories dynamically
         Set<String> catSet = fetchedCars.map((c) => c.categoryName).toSet();
-        List<String> catList = ["All"];
-        catList.addAll(catSet);
+        categories = ["All", ...catSet];
 
         cars = fetchedCars;
-        categories = catList;
 
-        // Fetch wishlist **before building UI**
         if (!widget.isGuest && token != null) {
           await fetchWishlist(token);
         }
 
-        // Now rebuild the UI with cars and wishlist ready
         setState(() {
           isLoading = false;
         });
       } else {
-        print('Failed to fetch cars: ${response.statusCode}');
-        print('Response body: ${response.body}');
-        setState(() {
-          isLoading = false;
-        });
+        setState(() => isLoading = false);
       }
     } catch (e) {
-      print('Error fetching cars: $e');
-      setState(() {
-        isLoading = false;
-      });
+      setState(() => isLoading = false);
     }
   }
 
-  // Fetch wishlist from backend and update notifier
   Future<void> fetchWishlist(String token) async {
     final url = Uri.parse('http://localhost:8000/api/wishlist/');
     final response = await http.get(
@@ -110,116 +94,183 @@ class _BrowseScreenState extends State<BrowseScreen> {
 
     if (response.statusCode == 200) {
       final List data = jsonDecode(response.body);
-      List<int> wishlistedIds =
-      data.map<int>((item) => item['car']['id'] as int).toList();
-      wishlistedCarsNotifier.value = wishlistedIds;
-    } else {
-      print('Failed to fetch wishlist: ${response.statusCode}');
+      wishlistedCarsNotifier.value =
+          data.map<int>((item) => item['car']['id'] as int).toList();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // filter cars based on selected category
     List<Car> displayedCars = selectedCategory == "All"
         ? cars
         : cars.where((c) => c.categoryName == selectedCategory).toList();
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text(
-          "Your Next Drive Starts Here...",
-          style: TextStyle(
-            fontFamily: "Times New Roman",
-            fontSize: 20,
+      backgroundColor: const Color(0xFFF4F7FA),
+      body: Column(
+        children: [
+          _buildTopBar(),
+
+          Expanded(
+            child: isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Categories
+                  SizedBox(
+                    height: 40,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: categories.length,
+                      itemBuilder: (context, index) {
+                        String category = categories[index];
+                        bool isSelected =
+                            category == selectedCategory;
+
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              selectedCategory = category;
+                            });
+                          },
+                          child: Container(
+                            margin:
+                            const EdgeInsets.only(right: 12),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? midnightBlue
+                                  : Colors.grey[100],
+                              borderRadius:
+                              BorderRadius.circular(20),
+                            ),
+                            child: Center(
+                              child: Text(
+                                category,
+                                style: TextStyle(
+                                  color: isSelected
+                                      ? Colors.white
+                                      : Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Cars list
+                  Expanded(
+                    child: displayedCars.isEmpty
+                        ? const Center(
+                      child: Text("No cars available"),
+                    )
+                        : ValueListenableBuilder<List<int>>(
+                      valueListenable:
+                      wishlistedCarsNotifier,
+                      builder: (context, wishlisted, _) {
+                        return ListView.builder(
+                          itemCount:
+                          displayedCars.length,
+                          itemBuilder: (context, index) {
+                            return CarCard(
+                              car: displayedCars[index],
+                              isGuest: widget.isGuest,
+                              onTap: () {
+                                if (widget.isGuest) {
+                                  Navigator.pushNamed(
+                                      context, '/login');
+                                } else {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          CarDetailsScreen(
+                                            car:
+                                            displayedCars[index],
+                                          ),
+                                    ),
+                                  );
+                                }
+                              },
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTopBar() {
+    return Container(
+      padding:
+      const EdgeInsets.only(top: 60, left: 24, right: 24, bottom: 20),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(30),
+          bottomRight: Radius.circular(30),
         ),
       ),
-      body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // categories row
-            Container(
-              height: 40,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: categories.length,
-                itemBuilder: (context, index) {
-                  String category = categories[index];
-                  bool isSelected = category == selectedCategory;
-
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        selectedCategory = category;
-                      });
-                    },
-                    child: Container(
-                      margin: EdgeInsets.only(right: 12),
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color:
-                        isSelected ? midnightBlue : Colors.grey[100],
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Center(
-                        child: Text(
-                          category,
-                          style: TextStyle(
-                            color: isSelected ? Colors.white : Colors.black,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                },
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: const [
+              Text(
+                "DISCOVER",
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 10,
+                  letterSpacing: 2,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 4),
+              Text(
+                "Your Next Drive",
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFF1A1C1E),
+                ),
+              ),
+            ],
+          ),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => WishlistScreen()));
+            },
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: deepMidnightBlue,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(
+                Icons.favorite, // Heart icon
+                color: Colors.white,
+                size: 22,
               ),
             ),
-
-            SizedBox(height: 16),
-
-            // cars list
-            Expanded(
-              child: displayedCars.isEmpty
-                  ? Center(child: Text("No cars available"))
-                  : ValueListenableBuilder<List<int>>(
-                valueListenable: wishlistedCarsNotifier,
-                builder: (context, wishlisted, _) {
-                  // rebuilds whenever wishlist changes
-                  return ListView.builder(
-                    itemCount: displayedCars.length,
-                    itemBuilder: (context, index) {
-                      return CarCard(
-                        car: displayedCars[index],
-                        isGuest: widget.isGuest,
-                        onTap: () {
-                          if (widget.isGuest) {
-                            Navigator.pushNamed(context, '/login');
-                          } else {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => CarDetailsScreen(
-                                    car: displayedCars[index]),
-                              ),
-                            );
-                          }
-                        },
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
+          )
+        ],
       ),
     );
   }

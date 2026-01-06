@@ -262,19 +262,31 @@ class _VerifyAccountScreenState extends State<VerifyAccountScreen>
           // -----------------------
           // RESEND VERIFICATION CODE BUTTON WITH COOLDOWN
           // -----------------------
-          TextButton(
-            onPressed: (isLoading || resendCooldown > 0) ? null : resendCode,
-            child: Text(
-              resendCooldown > 0
-                  ? 'Resend in $resendCooldown s'
-                  : 'Resend Verification Code',
-              style: TextStyle(
-                color: resendCooldown > 0 ? Colors.grey : Colors.blue,
-                decoration: TextDecoration.underline,
-                fontWeight: FontWeight.bold,
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: (isLoading || resendCooldown > 0) ? null : resendCode,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white, // or any background color you want
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                side: const BorderSide(color: Colors.grey), // optional border to match design
+              ),
+              child: Text(
+                resendCooldown > 0
+                    ? 'Resend in $resendCooldown s'
+                    : 'Resend Verification Code',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: resendCooldown > 0 ? Colors.grey : deepMidnightBlue,
+                ),
               ),
             ),
           ),
+
 
           const SizedBox(height: 20),
           SizedBox(

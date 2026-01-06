@@ -5,8 +5,13 @@ import 'package:flutter/material.dart';
 
 import '../globals.dart';
 import '../main_screens/bottom_nav_screen.dart';
+import '../notifications/notifications.dart';
+import '../screens/auth/admin_document_screen.dart';
+import 'admin_customers_screen.dart';
 import 'admin_damages_page.dart';
+import 'admin_manage_payments.dart';
 import 'admin_reservations_page.dart';
+import 'admin_returns_page.dart';
 import 'car_manage_page.dart';
 
 class AdminGridDashboard extends StatelessWidget {
@@ -19,39 +24,93 @@ class AdminGridDashboard extends StatelessWidget {
         icon: Icons.car_rental,
         title: 'Manage Rentals',
         gradient: LinearGradient(colors: [electricCyan, steelBlue]),
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AdminReservationsPage())),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => AdminReservationsPage()),
+        ),
       ),
       _GridItem(
         icon: Icons.directions_car,
         title: 'Car Inventory',
         gradient: LinearGradient(colors: [deepMidnightBlue, electricCyan]),
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AdminCarsPage())),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => AdminCarsPage()),
+        ),
       ),
       _GridItem(
         icon: Icons.report,
         title: 'Manage Damages',
         gradient: LinearGradient(colors: [steelBlue, electricCyan]),
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AdminDamagesPage())),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => AdminDamagesPage()),
+        ),
       ),
       _GridItem(
         icon: Icons.people,
         title: 'Customer Info',
         gradient: LinearGradient(colors: [electricCyan, deepMidnightBlue]),
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AdminCarsPage())),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => AdminCustomersListScreen()),
+        ),
       ),
+
+      // ===== NEW BUTTONS (NO EXISTING NAVIGATION TOUCHED) =====
+
+      _GridItem(
+        icon: Icons.payments,
+        title: 'Manage Payments',
+        gradient: LinearGradient(colors: [deepMidnightBlue, steelBlue]),
+        onTap: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => AdminPaymentsScreen()));
+        },
+      ),
+      _GridItem(
+        icon: Icons.assignment_return,
+        title: 'Return Car',
+        gradient: LinearGradient(colors: [electricCyan, deepMidnightBlue]),
+        onTap: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => AdminReturnsPage()));        },
+      ),
+      _GridItem(
+        icon: Icons.notifications,
+        title: 'Notifications',
+        gradient: LinearGradient(colors: [steelBlue, electricCyan]),
+        onTap: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => UserNotificationsPage()));
+        },
+      ),
+
+      // ===== EXISTING =====
+
       _GridItem(
         icon: Icons.analytics,
         title: 'Reports',
         gradient: LinearGradient(colors: [deepMidnightBlue, steelBlue]),
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AdminReportsPage())),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => AdminReportsPage()),
+        ),
       ),
       _GridItem(
         icon: Icons.settings,
         title: 'Settings',
         gradient: LinearGradient(colors: [electricCyan, steelBlue]),
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AdminSystemSettingsPage())),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => AdminSystemSettingsPage()),
+        ),
       ),
     ];
+
 
     return Scaffold(
       body: Container(

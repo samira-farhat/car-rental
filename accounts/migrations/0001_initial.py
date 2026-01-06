@@ -60,6 +60,7 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('code', models.CharField(max_length=6)),
                 ('purpose', models.CharField(choices=[('verify', 'Verify Account'), ('reset', 'Reset Password')], max_length=10)),
+                ('purpose', models.CharField(choices=[('verify', 'Verify Account'), ('reset', 'Reset Password')], max_length=10)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('expires_at', models.DateTimeField()),
                 ('is_used', models.BooleanField(default=False)),

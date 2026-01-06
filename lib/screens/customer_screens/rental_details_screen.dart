@@ -161,7 +161,7 @@ class _RentalDetailsScreenState extends State<RentalDetailsScreen>
             borderRadius: BorderRadius.circular(24),
             image: DecorationImage(
               image: NetworkImage(
-                r['car_image'] ?? 'https://via.placeholder.com/400x220',
+                'http://localhost:8000/${r['car_image']}' ?? 'https://via.placeholder.com/400x220',
               ),
               fit: BoxFit.cover,
             ),
@@ -238,7 +238,7 @@ class _RentalDetailsScreenState extends State<RentalDetailsScreen>
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => ReturnScreen()),
+            MaterialPageRoute(builder: (_) => ReturnScreen(rentalId: widget.rentalId)),
           );
         },
         style: OutlinedButton.styleFrom(

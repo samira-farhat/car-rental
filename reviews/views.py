@@ -2,7 +2,8 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
-from .serializers import ReviewSerializer
+from .serializers import ReviewSerializer, CarReviewListSerializer
+from .models import Review
 from django.contrib.auth import get_user_model
 from notifications.services.notification_service import send_notification
 from .serializers import ReviewSerializer, CarReviewListSerializer

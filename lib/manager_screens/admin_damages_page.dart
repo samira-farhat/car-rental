@@ -84,6 +84,9 @@ class _AdminDamagesPageState extends State<AdminDamagesPage> with TickerProvider
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7FA),
+      appBar: AppBar(
+        automaticallyImplyLeading: true,
+      ),
       body: Column(
         children: [
           _buildHeader(),
@@ -137,7 +140,7 @@ class _AdminDamagesPageState extends State<AdminDamagesPage> with TickerProvider
             },
             icon: Container(
               padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(color: electricCyan, borderRadius: BorderRadius.circular(12)),
+              decoration: BoxDecoration(color: deepMidnightBlue, borderRadius: BorderRadius.circular(12)),
               child: const Icon(Icons.add, color: Colors.white),
             ),
           )
@@ -384,6 +387,7 @@ class _AddEditDamagePageState extends State<AddEditDamagePage> {
               _buildImagePreview(),
               const SizedBox(height: 24),
               DropdownButtonFormField<Map>(
+                dropdownColor: Colors.white,
                 value: selectedCar,
                 decoration: _dropdownDecoration("Select Car", Icons.directions_car),
                 items: cars.map<DropdownMenuItem<Map>>((c) {
@@ -391,6 +395,7 @@ class _AddEditDamagePageState extends State<AddEditDamagePage> {
                 }).toList(),
                 onChanged: (v) => setState(() => selectedCar = v),
                 validator: (v) => v == null ? "Required" : null,
+                style: const TextStyle(color: Colors.black),
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -433,10 +438,12 @@ class _AddEditDamagePageState extends State<AddEditDamagePage> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
+                dropdownColor: Colors.white,
                 value: status,
                 decoration: _dropdownDecoration("Status", Icons.info_outline),
                 items: statusOptions.map((s) => DropdownMenuItem(value: s, child: Text(s.toUpperCase()))).toList(),
                 onChanged: (v) => setState(() => status = v!),
+                style: const TextStyle(color: Colors.black),
               ),
               const SizedBox(height: 32),
               SizedBox(

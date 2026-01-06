@@ -41,7 +41,6 @@ class MyApp extends StatelessWidget {
         '/forgot_password': (context) => ForgotPasswordScreen(),
         '/home': (context) => HomeScreen(),
         '/bottom_nav': (context) => BottomNavScreen(),
-        '/payment': (context) => PaymentScreen(),
         '/verify': (context) {
           final args = ModalRoute.of(context)!.settings.arguments as Map<String, String>;
           return VerifyAccountScreen(

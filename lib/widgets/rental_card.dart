@@ -131,7 +131,7 @@ class RentalCard extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => ReturnScreen(),
+                    builder: (_) => ReturnScreen(rentalId: rental['rentalid']),
                   ),
                 );
               },

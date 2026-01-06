@@ -59,6 +59,9 @@ class _AdminReservationsPageState extends State<AdminReservationsPage>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7FA),
+      appBar: AppBar(
+        automaticallyImplyLeading: true,
+      ),
       body: Column(
         children: [
           _buildTopBar(),
@@ -88,12 +91,12 @@ class _AdminReservationsPageState extends State<AdminReservationsPage>
             children: [
               Text("FLEET STATUS", style: TextStyle(color: Colors.grey.shade400, fontSize: 10, letterSpacing: 2, fontWeight: FontWeight.bold)),
               const SizedBox(height: 4),
-              const Text("Operations", style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: Color(0xFF1A1C1E))),
+              const Text("Reservations", style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: Color(0xFF1A1C1E))),
             ],
           ),
           Container(
             padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: electricCyan, borderRadius: BorderRadius.circular(14)),
+            decoration: BoxDecoration(color: deepMidnightBlue, borderRadius: BorderRadius.circular(14)),
             child: const Icon(Icons.analytics_outlined, color: Colors.white, size: 20),
           )
         ],
@@ -108,7 +111,7 @@ class _AdminReservationsPageState extends State<AdminReservationsPage>
       decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(15)),
       child: TabBar(
         controller: _tabController,
-        indicator: BoxDecoration(color: const Color(0xFF49C5E0), borderRadius: BorderRadius.circular(12)),
+        indicator: BoxDecoration(color: deepMidnightBlue, borderRadius: BorderRadius.circular(12)),
         labelColor: Colors.white,
         unselectedLabelColor: Colors.grey.shade600,
         labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../manager_screens/admin_dashboard.dart';
 import '../manager_screens/admin_reservations_page.dart';
 import '../manager_screens/car_manage_page.dart';
+import '../notifications/notifications.dart';
 import '../screens/customer_screens/browse_screen.dart';
 import '../screens/features/reviews_screen.dart';
 
@@ -33,7 +34,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
       Builder(builder: (_) => BrowseScreen(isGuest: widget.isGuest)), // first tab: browse cars
       Builder(builder: (_) => SearchScreen()), // second tab: search
       Builder(builder: (_) => MyRentalsScreen()), // third tab: my rentals
-      Builder(builder: (_) => WishlistScreen()), // fourth tab: wishlist
+      Builder(builder: (_) => UserNotificationsPage()), // fourth tab: wishlist
       Builder(builder: (_) => ProfileScreen()), // fifth tab: profile
     ];
   }
@@ -57,6 +58,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
       body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
+        backgroundColor: Colors.white,
         onTap: _onTabTapped,
         selectedItemColor: midnightBlue,
         unselectedItemColor: Colors.grey,
@@ -90,8 +92,8 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
           ),
 
           BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Wishlist',
+            icon: Icon(Icons.notifications_active),
+            label: 'Notifications',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
