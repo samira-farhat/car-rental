@@ -1,8 +1,8 @@
-# Car Rental Management System 🚗💨
+# Car Rental Management System 
 
 A comprehensive, full-stack mobile application designed to digitally transform and automate car rental operations for **Drive with Khachab**. This system replaces manual Excel-based tracking with a streamlined, secure platform for customers, managers, and administrators.
 
-## 👥 Team Project
+## Team Project
 
 This project was developed as a collaborative team effort for the **Software Engineering (CMPS272)** course at **Phoenicia University (PU)**, Fall 2025-26.
 
@@ -11,7 +11,7 @@ This project was developed as a collaborative team effort for the **Software Eng
 
 
 
-## 📌 Problem Statement
+## Problem Statement
 
 The client, *Drive with Khachab*, previously managed bookings through Instagram and Excel, leading to:
 
@@ -28,9 +28,9 @@ The client, *Drive with Khachab*, previously managed bookings through Instagram 
 
 
 
-## 🚀 Key Features
+## Key Features
 
-### For Customers 📱
+### For Customers 
 
 * 
 **Browse & Search:** Explore a dynamic car catalog with filters for type, price, and model.
@@ -53,7 +53,7 @@ The client, *Drive with Khachab*, previously managed bookings through Instagram 
 
 
 
-### For Managers & Admins 🛠️
+### For Managers & Admins 
 
 * 
 **Inventory Management:** Full CRUD operations (Create, Read, Update, Delete) for the car fleet.
@@ -72,7 +72,7 @@ The client, *Drive with Khachab*, previously managed bookings through Instagram 
 
 
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 * 
 **Frontend:** Flutter (Mobile App targeting Android 10+).
@@ -91,7 +91,7 @@ The client, *Drive with Khachab*, previously managed bookings through Instagram 
 
 
 
-## 📊 System Design
+## System Design
 
 The project followed a rigorous software engineering lifecycle, including:
 
@@ -108,7 +108,7 @@ The project followed a rigorous software engineering lifecycle, including:
 
 
 
-## ⚙️ Requirements
+## Requirements
 
 * 
 **Android Devices:** Optimized for Android 10 and above.
