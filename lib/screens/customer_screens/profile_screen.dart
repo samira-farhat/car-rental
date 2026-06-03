@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../services/profile_service.dart';
 import '../../services/document_service.dart';
 import '../../services/review_service.dart';
+import '../features/reviews_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -249,7 +250,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white, // or Colors.grey.shade50 for subtle contrast
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -277,7 +278,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 8),
           Row(
             children: [
-              const Icon(Icons.star, color: Colors.amber, size: 18),
+              ...List.generate(
+                review['rating'] ?? 0,
+                    (_) => const Icon(Icons.star, color: Colors.amber, size: 18),
+              ),
               const SizedBox(width: 4),
               Text(
                 '${review['rating'] ?? '-'} / 5',
@@ -393,18 +397,55 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         : reviews.map((r) => _reviewCard(r)).toList(),
                   ),
                   const SizedBox(height: 16),
-                  ElevatedButton(
-                    style:  ElevatedButton.styleFrom(
-                      backgroundColor: deepMidnightBlue, // <-- Set your desired color here
-                      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),),
-                    onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen()));
-                    },
-                    child: const Text('LOGOUT', style: TextStyle(color: Colors.white),),
-                  ),
+                  Column(
+                    children: [
+                      SizedBox(
+                        width: double.infinity, // full width button
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: deepMidnightBlue,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => HomeScreen()));
+                          },
+                          child: const Text(
+                            'LOGOUT',
+                            style: TextStyle(color: Colors.white, fontSize: 16),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: electricCyan,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => CarReviewPage())); // your review page widget
+                          },
+                          child: const Text(
+                            'Submit A Review',
+                            style: TextStyle(color: Colors.white, fontSize: 16),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
                 ],
               ),
             ),

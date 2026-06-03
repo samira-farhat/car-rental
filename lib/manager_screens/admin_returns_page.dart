@@ -1,3 +1,4 @@
+import 'package:car_management_frontend/globals.dart';
 import 'package:flutter/material.dart';
 import 'return_service.dart';
 
@@ -89,7 +90,7 @@ class _AdminReturnsPageState extends State<AdminReturnsPage>
       child: TabBar(
         controller: _tabController,
         indicator: BoxDecoration(
-          color: const Color(0xFF49C5E0),
+          color: deepMidnightBlue,
           borderRadius: BorderRadius.circular(12),
         ),
         labelColor: Colors.white,

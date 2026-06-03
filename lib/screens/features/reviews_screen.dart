@@ -57,7 +57,7 @@ class _CarReviewPageCombinedState extends State<CarReviewPage>
     if (token == null) return;
 
     final response = await http.get(
-      Uri.parse('http://localhost:8000/api/rentals/rented-cars/'),
+      Uri.parse('http://localhost:8000/api/rentals/rented-cars-reviews/'),
       headers: {'Authorization': 'Bearer $token'},
     );
 
